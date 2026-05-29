@@ -1,0 +1,59 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: python (${{ matrix.py }})
+    runs-on: ubuntu-latest
+    # Activates once the python/ package exists (pre-development: skipped if absent).
+    if: ${{ hashFiles('python/pyproject.toml') != '' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        py: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.py }}
+          cache: pip
+      - run: pip install -e "python/.[local,serve,dev]"
+      - name: Lint
+        run: |
+          ruff check python/
+          ruff format --check python/
+      - name: Type check
+        run: mypy python/cryptomem
+      - name: Test (unit, mock mode)
+        run: pytest python/ -m "not integration"
+      - name: Build smoke (wheel/sdist)
+        run: python -m build python/
+
+  rust:
+    name: rust
+    runs-on: ubuntu-latest
+    # Activates once the rust/ workspace exists.
+    if: ${{ hashFiles('rust/Cargo.toml') != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+      - run: cargo fmt --all --manifest-path rust/Cargo.toml -- --check
+      - run: cargo clippy --manifest-path rust/Cargo.toml --all-targets -- -D warnings
+      - run: cargo test --manifest-path rust/Cargo.toml --workspace
+      - run: cargo publish --dry-run --manifest-path rust/Cargo.toml -p cryptomem-rs

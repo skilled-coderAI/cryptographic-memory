@@ -1,0 +1,46 @@
+name: Feature request / RFC
+description: Suggest an enhancement or propose a design change.
+title: "feat: <short description>"
+labels: ["enhancement", "triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What problem does this solve? Who benefits?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the feature or change. For larger/breaking changes, this becomes an RFC — reference the relevant doc in `docs/`.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Does this affect the wire protocol?
+      description: Changes to MemoryNode or /cmem/v1/* affect both Python and Rust packages.
+      options:
+        - "No"
+        - "Yes — protocol/breaking change"
+        - "Not sure"
+    validations:
+      required: true
+  - type: checkboxes
+    id: roadmap
+    attributes:
+      label: Roadmap
+      options:
+        - label: I've checked ROADMAP.md and this isn't already planned/tracked.
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contribution
+      options:
+        - label: I'm willing to help implement this.

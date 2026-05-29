@@ -1,0 +1,7 @@
+# Default owners for everything in the repo.
+*                 @skilled-coderAI
+
+# Security-critical code requires maintainer review.
+/python/cryptomem/crypto/        @skilled-coderAI
+/python/cryptomem/verification/  @skilled-coderAI
+SECURITY.md                      @skilled-coderAI

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & Discussions
+    url: https://github.com/skilled-coderAI/cryptographic-memory/discussions
+    about: Ask questions, share ideas, or show what you built. Not for bug reports.
+  - name: Security vulnerability (private)
+    url: https://github.com/skilled-coderAI/cryptographic-memory/security/advisories/new
+    about: Report security issues privately. Do NOT open a public issue. See SECURITY.md.

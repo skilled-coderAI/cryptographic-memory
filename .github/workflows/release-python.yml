@@ -1,0 +1,40 @@
+name: release-python
+
+# Tag the Python package release as `py-vX.Y.Z` to trigger this workflow.
+on:
+  push:
+    tags: ["py-v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install build
+      - run: python -m build python/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: python/dist/*
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write   # OIDC -> short-lived PyPI credential (Trusted Publishing)
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        # First validate on TestPyPI by setting:
+        #   with:
+        #     repository-url: https://test.pypi.org/legacy/
