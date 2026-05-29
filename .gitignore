@@ -1,0 +1,43 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+*.so
+
+# ---- Rust ----
+/rust/target/
+target/
+**/*.rs.bk
+Cargo.lock        # library crate: keep unlocked (binaries may commit it)
+
+# ---- cryptomem local data / models ----
+*.sqlite
+*.sqlite3
+*.db
+models/
+.cache/
+*.onnx
+# Never commit private keys
+*.key
+*.pem
+secrets/
+.env
+.env.*
+
+# ---- Editors / OS ----
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
