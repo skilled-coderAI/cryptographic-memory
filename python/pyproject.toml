@@ -1,0 +1,60 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cryptomem"
+version = "0.1.0"
+description = "Cryptographically verified, relational, persistent memory for AI agents."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT OR Apache-2.0" }
+authors = [{ name = "cryptomem contributors" }]
+keywords = ["ai", "memory", "cryptography", "graphrag", "ollama", "agents"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security :: Cryptography",
+]
+dependencies = [
+    "pynacl>=1.5",
+    "pydantic>=2.6",
+    "pydantic-settings>=2.2",
+    "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+local = ["sentence-transformers>=3.0", "onnxruntime>=1.17"]
+serve = ["fastapi>=0.110", "uvicorn>=0.29", "tiktoken>=0.7"]
+dev = ["pytest>=8", "respx>=0.21", "ruff>=0.6", "mypy>=1.10", "build>=1.2"]
+
+[project.scripts]
+cryptomem = "cryptomem.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["cryptomem"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
+
+[[tool.mypy.overrides]]
+module = ["nacl.*", "sentence_transformers.*", "tiktoken.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: end-to-end tests that may require a running Ollama instance",
+]
