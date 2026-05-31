@@ -107,7 +107,7 @@ cryptomem serve --port 8088 --ollama-url http://localhost:11434
 ## 6. Reporting Bugs & Security Issues
 
 - **Bugs**: open an issue using the bug template; include OS, Python/Rust version, Ollama version & model, and a minimal repro.
-- **Security vulnerabilities**: do **not** open a public issue. Email **security@cryptomem.dev** *(replace before release)* with details. We follow coordinated disclosure (see `SECURITY.md` once published).
+- **Security vulnerabilities**: do **not** open a public issue. Email **jayakarthi.d@gmail.com** *(replace before release)* with details. We follow coordinated disclosure (see `SECURITY.md` once published).
 
 ---
 
