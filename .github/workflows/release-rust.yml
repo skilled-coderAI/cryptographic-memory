@@ -1,48 +1,67 @@
-# --------------------------------------------------------------
-# Release Rust – builds a binary on every version tag,
-# but only if a Cargo.toml file exists in the repository.
-# --------------------------------------------------------------
 name: Release Rust
 
 on:
   push:
     tags:
-      - "v*"   # matches tags like v1.2.3, v0.9.0‑rc, etc.
+      - "v*"
+
+permissions:
+  contents: write
 
 jobs:
   build-and-release:
-    # ← expression wrapped in ${{ … }}
-    if: ${{ hashFiles('rust/Cargo.toml') != '' }}
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: rust
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Verify Rust project exists
+        run: |
+          test -f Cargo.toml
 
       - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
         with:
-          toolchain: stable
-          profile: minimal
-          override: true
+          workspaces: rust
 
       - name: Build release binary
+        run: cargo build --release --locked
+
+      - name: Determine binary name
+        id: binary
         run: |
-          cd rust
-          cargo build --release
+          BIN_NAME=$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[0].targets[] | select(.kind[]=="bin") | .name' | head -n1)
 
-      # --------------------------------------------------
-      # OPTIONAL – create a GitHub Release and upload the binary.
-      # --------------------------------------------------
-      - name: Create GitHub release
+          if [ -z "$BIN_NAME" ]; then
+            echo "No binary target found"
+            exit 1
+          fi
+
+          echo "name=$BIN_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Create release archive
+        run: |
+          mkdir release
+
+          cp target/release/${{ steps.binary.outputs.name }} release/
+
+          cd release
+
+          tar -czf \
+            ../${{ steps.binary.outputs.name }}-linux-x86_64.tar.gz \
+            ${{ steps.binary.outputs.name }}
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          draft: false
-          prerelease: false
-
-      - name: Upload binary to release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: rust/target/release/cryptomem-rs   # ← replace with the actual binary name
+          generate_release_notes: true
+          files: |
+            rust/${{ steps.binary.outputs.name }}-linux-x86_64.tar.gz
