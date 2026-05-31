@@ -26,3 +26,6 @@ class Settings(BaseSettings):
     faithfulness_threshold: float = 0.25
     entropy_samples: int = 5
     entropy_cluster_threshold: float = 0.8
+    enable_proactive: bool = False
+    proactive_suggestions: int = 3
+    enable_writeback: bool = False

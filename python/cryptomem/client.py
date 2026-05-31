@@ -22,6 +22,9 @@ from cryptomem.models import (
     Relationship,
     ScoredNode,
 )
+from cryptomem.proactive.planner import Planner
+from cryptomem.proactive.triggers import TriggerEngine
+from cryptomem.proactive.writeback import WriteBack
 from cryptomem.retrieval.retriever import Retriever
 from cryptomem.store.base import MemoryStore
 from cryptomem.store.sqlite_store import SqliteStore
@@ -91,19 +94,28 @@ class MemoryClient:
             relationships=rels,
             metadata=meta,
         )
-        digest = sha256(unsigned.model_dump())
-        existing_hashes = [n.crypto.hash for n in self.store.all() if n.crypto is not None]
-        root = merkle_root([*existing_hashes, digest])
+        return self._seal(unsigned)
 
-        unsigned.embedding = self.embedder.embed(f"{entity} {content}")
-        unsigned.crypto = CryptoEnvelope(
+    def _seal(self, node: MemoryNode) -> MemoryNode:
+        """Hash, Merkle-anchor, sign, embed, and persist ``node`` in place."""
+        node.crypto = None
+        node.embedding = None
+        digest = sha256(node.model_dump())
+        existing = [
+            n.crypto.hash
+            for n in self.store.all()
+            if n.crypto is not None and n.node_id != node.node_id
+        ]
+        root = merkle_root([*existing, digest])
+        node.embedding = self.embedder.embed(f"{node.entity} {node.content}")
+        node.crypto = CryptoEnvelope(
             hash=digest,
             signature=self.signer.sign(digest),
             public_key_ref=self.signer.public_key_hex,
             merkle_root=root,
         )
-        self.store.write(unsigned)
-        return unsigned
+        self.store.write(node)
+        return node
 
     def verify(self, node: MemoryNode) -> bool:
         """Re-derive the hash and check the signature; ``False`` on any tamper."""
@@ -205,6 +217,12 @@ class MemoryClient:
             score, _ = self.faithfulness.score(text, admitted)
             provenance["faithfulness"] = score
             provenance["faithful"] = score >= self.settings.faithfulness_threshold
+        if self.settings.enable_proactive:
+            provenance["proactive_suggestions"] = self.suggest(
+                [s.node for s in admitted], limit=self.settings.proactive_suggestions
+            )
+        if self.settings.enable_writeback:
+            provenance["staged_nodes"] = [n.node_id for n in self.stage_facts(text)]
         return text, provenance
 
     def answer(
@@ -264,3 +282,30 @@ class MemoryClient:
         """Re-check a draft answer claim-by-claim against verified memory (CoVe)."""
         cove = ChainOfVerification(self, self.embedder, self.settings.faithfulness_threshold)
         return cove.verify(draft, top_k=top_k)
+
+    def suggest(self, injected: list[MemoryNode], limit: int | None = None) -> list[dict]:
+        """Pre-stage adjacent verified facts for the likely next turn (planner)."""
+        n = limit if limit is not None else self.settings.proactive_suggestions
+        return Planner(self.store, self.verify).suggest(injected, limit=n)
+
+    def triggers(self) -> list[dict]:
+        """Evaluate proactive triggers (reconcile / refresh / link-gap)."""
+        return TriggerEngine(self).evaluate()
+
+    def stage_facts(self, text: str, entity: str | None = None) -> list[MemoryNode]:
+        """Extract facts from ``text`` and stage them as signed pending nodes."""
+        return WriteBack(self).stage(text, entity=entity)
+
+    def pending(self) -> list[MemoryNode]:
+        """Return verified nodes awaiting confirmation (``status="pending"``)."""
+        return [
+            n for n in self.store.all() if self.verify(n) and n.metadata.get("status") == "pending"
+        ]
+
+    def confirm(self, node_id: str) -> MemoryNode | None:
+        """Promote a pending node to ``confirmed`` and re-sign it."""
+        node = self.store.get(node_id)
+        if node is None or node.metadata.get("status") != "pending":
+            return None
+        node.metadata["status"] = "confirmed"
+        return self._seal(node)

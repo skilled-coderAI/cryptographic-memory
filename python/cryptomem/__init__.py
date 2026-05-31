@@ -11,6 +11,7 @@ from cryptomem.models import (
     Relationship,
     ScoredNode,
 )
+from cryptomem.proactive import Planner, TriggerEngine, WriteBack
 from cryptomem.verification import (
     ChainOfVerification,
     Citer,
@@ -39,5 +40,8 @@ __all__ = [
     "Citer",
     "SemanticEntropy",
     "ChainOfVerification",
+    "Planner",
+    "TriggerEngine",
+    "WriteBack",
     "__version__",
 ]

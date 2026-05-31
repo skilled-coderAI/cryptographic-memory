@@ -100,3 +100,33 @@ def test_verify_endpoint(api: TestClient):
     )
     body = api.post("/cmem/v1/verify", json={"draft": "Budget approved at 4.2M for FY26."}).json()
     assert body["verdict"] == "verified"
+
+
+def test_triggers_endpoint(api: TestClient):
+    api.post(
+        "/cmem/v1/memory",
+        json={"entity": "Server", "content": "The primary region is us-east-1."},
+    )
+    body = api.get("/cmem/v1/triggers").json()
+    assert any(s["type"] == "link_gap" for s in body["suggestions"])
+
+
+def test_pending_and_confirm_endpoints(api: TestClient):
+    node = api.post(
+        "/cmem/v1/memory",
+        json={
+            "entity": "Project Phoenix",
+            "content": "Phoenix shipped in Q3.",
+            "metadata": {"status": "pending"},
+        },
+    ).json()
+    node_id = node["node_id"]
+
+    listing = api.get("/cmem/v1/memory/pending").json()
+    assert any(n["node_id"] == node_id for n in listing["nodes"])
+
+    confirmed = api.post(f"/cmem/v1/memory/{node_id}/confirm").json()
+    assert confirmed["metadata"]["status"] == "confirmed"
+    assert confirmed["verified"] is True
+
+    assert api.post("/cmem/v1/memory/missing/confirm").status_code == 404

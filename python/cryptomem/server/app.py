@@ -120,6 +120,10 @@ def create_app(
         )
         return {**node.model_dump(), "verified": mem.verify(node)}
 
+    @app.get("/cmem/v1/memory/pending")
+    def pending() -> dict:
+        return {"nodes": [n.model_dump() for n in mem.pending()]}
+
     @app.get("/cmem/v1/memory/{node_id}")
     def get_memory(node_id: str) -> dict:
         node = mem.store.get(node_id)
@@ -145,6 +149,17 @@ def create_app(
     @app.post("/cmem/v1/verify")
     def verify(body: VerifyIn) -> dict:
         return mem.verify_answer(body.draft, top_k=body.top_k)
+
+    @app.get("/cmem/v1/triggers")
+    def triggers() -> dict:
+        return {"suggestions": mem.triggers()}
+
+    @app.post("/cmem/v1/memory/{node_id}/confirm")
+    def confirm(node_id: str) -> dict:
+        node = mem.confirm(node_id)
+        if node is None:
+            raise HTTPException(status_code=404, detail="no pending node with that id")
+        return {**node.model_dump(), "verified": mem.verify(node)}
 
     @app.get("/cmem/v1/memory/{node_id}/neighbors")
     def neighbors(node_id: str, depth: int = 1) -> dict:
