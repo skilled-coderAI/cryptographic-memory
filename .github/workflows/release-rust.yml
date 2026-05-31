@@ -10,6 +10,11 @@ permissions:
   contents: write
   pull-requests: write
 
+# Serialize release-plz so concurrent main pushes can't race the release PR/tag.
+concurrency:
+  group: release-rust
+  cancel-in-progress: false
+
 jobs:
   release-plz:
     runs-on: ubuntu-latest

@@ -42,25 +42,22 @@ build-backend = "hatchling.build"
 
 [project]
 name = "cryptomem"
-dynamic = ["version"]
-description = "Cryptographically verified, relational, persistent memory plugin for AI agents."
+version = "0.1.0"
+description = "Cryptographically verified, relational, persistent memory for AI agents."
 readme = "README.md"
 requires-python = ">=3.10"
-license = "MIT OR Apache-2.0"
+license = { text = "MIT OR Apache-2.0" }
 authors = [{ name = "cryptomem contributors" }]
-keywords = ["llm", "memory", "rag", "ollama", "agents", "cryptography", "graphrag"]
+keywords = ["ai", "memory", "cryptography", "graphrag", "ollama", "agents"]
 dependencies = [
-  "pynacl>=1.5", "pydantic>=2.6", "pydantic-settings>=2.2",
-  "httpx>=0.27", "tiktoken>=0.7",
+  "pynacl>=1.5", "pydantic>=2.6", "pydantic-settings>=2.2", "httpx>=0.27",
 ]
 
 [project.optional-dependencies]
-local   = ["sqlite-vec>=0.1", "onnxruntime>=1.17", "sentence-transformers>=3.0"]
-serve   = ["fastapi>=0.110", "uvicorn>=0.29"]
-neo4j   = ["neo4j-graphrag>=1.16"]
-compress= ["llmlingua>=0.2"]
-verify  = ["transformers>=4.40"]
-dev     = ["pytest>=8", "respx>=0.21", "ruff", "mypy", "build"]
+local   = ["sentence-transformers>=3.0", "onnxruntime>=1.17"]
+serve   = ["fastapi>=0.110", "uvicorn>=0.29", "tiktoken>=0.7"]
+neo4j   = ["neo4j>=5.14"]
+dev     = ["pytest>=8", "respx>=0.21", "ruff>=0.6", "mypy>=1.10", "build>=1.2"]
 
 [project.scripts]
 cryptomem = "cryptomem.cli:main"     # `cryptomem serve`
@@ -109,30 +106,54 @@ jobs:
 
 Validate on **TestPyPI** first (same action with `repository-url`), then promote.
 
+The shipped [`release-python.yml`](../.github/workflows/release-python.yml) adds three
+guarantees around this skeleton:
+- a **`verify-version`** gate that fails the release unless the `py-vX.Y.Z` tag equals both
+  `pyproject.toml`'s `version` and `cryptomem.__version__`;
+- a **`twine check`** metadata smoke before upload;
+- a **`github-release`** job that creates the GitHub Release (auto-generated notes) and
+  attaches the built wheel + sdist.
+The whole workflow runs under a non-cancelling `concurrency` group so a re-pushed tag can
+never race an in-flight publish.
+
 ---
 
 ## 3. Rust Crate — `cryptomem-rs` → crates.io
 
-`cryptomem-rs` is a **thin, typed client** over the sidecar REST API (`/api/*` + `/cmem/v1/*`) — it does not reimplement the crypto engine (that stays in Python).
+`cryptomem-rs` is a **typed client** over the sidecar REST API (`/api/*` + `/cmem/v1/*`).
+It also reproduces the canonical hashing + Ed25519 signing **byte-for-byte**, so a
+Rust-signed node verifies on the Python engine via `POST /cmem/v1/memory/signed`. The
+networking layer is gated behind the default `http` feature, so the crypto core builds
+with `--no-default-features` (no `reqwest`/TLS).
 
 ```toml
-# rust/crates/cryptomem-rs/Cargo.toml
+# rust/cryptomem-rs/Cargo.toml
 [package]
 name = "cryptomem-rs"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.75"               # documented MSRV
-description = "Rust client for the cryptomem verified-memory sidecar."
+rust-version = "1.70"               # documented MSRV
+description = "Typed Rust client for the cryptomem verified-memory sidecar, with client-side Ed25519 signing that the Python engine verifies."
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/skilled-coderAI/cryptographic-memory"
-keywords = ["llm", "memory", "ollama", "agents", "rag"]
-categories = ["api-bindings"]
+keywords = ["ai", "memory", "cryptography", "ed25519", "rag"]
+categories = ["api-bindings", "cryptography"]
 
 [dependencies]
-reqwest = { version = "0.12", features = ["json"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+sha2 = "0.10"
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+rand = "0.8"
+hex = "0.4"
+thiserror = "1"
+reqwest = { version = "0.12", default-features = false, features = [
+    "blocking", "json", "rustls-tls",
+], optional = true }
+
+[features]
+default = ["http"]
+http = ["dep:reqwest"]
 ```
 
 ### 3.1 Release automation with `release-plz`
