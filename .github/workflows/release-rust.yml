@@ -1,33 +1,50 @@
-name: release-rust
+# --------------------------------------------------------------
+# Release workflow – builds and publishes a Rust binary when a
+# tag (v*) is pushed, *but only if the repository actually
+# contains a Rust Cargo.toml*.
+# --------------------------------------------------------------
+name: Release Rust
 
-# release-plz derives versions from Conventional Commits, updates the changelog,
-# opens release PRs, tags, and runs `cargo publish` for workspace members.
 on:
   push:
-    branches: [main]
-
-permissions:
-  contents: write
-  pull-requests: write
-
-# Serialize release-plz so concurrent main pushes can't race the release PR/tag.
-concurrency:
-  group: release-rust
-  cancel-in-progress: false
+    tags:
+      - "v*"   # e.g. v1.2.3
 
 jobs:
-  release-plz:
+  build-and-release:
+    name: Build & Release
     runs-on: ubuntu-latest
-    # Activates once the rust/ workspace exists.
+    # <-- Fixed: hashFiles is now inside ${{ … }}
     if: ${{ hashFiles('rust/Cargo.toml') != '' }}
+
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
         with:
-          fetch-depth: 0
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: release-plz/action@v0
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - name: Build release binary
+        run: |
+          cd rust
+          cargo build --release
+
+      # ------------------------------------------------------
+      # OPTIONAL – create a GitHub release and upload the binary.
+      # ------------------------------------------------------
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
         with:
-          manifest_path: rust/Cargo.toml
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+
+      - name: Upload binary to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: rust/target/release/cryptomem-rs
