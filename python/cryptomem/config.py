@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     embedder: str = "stub"
     backend_url: str | None = None
     backend_api_key: str | None = None
+    neo4j_uri: str = "bolt://localhost:7687"
+    neo4j_user: str = "neo4j"
+    neo4j_password: str = "neo4j"
+    neo4j_database: str = "neo4j"
     signing_key_path: str = "./cryptomem.key"
     byok_provider: str | None = None
     signing_seed_env: str = "CRYPTOMEM_SIGNING_SEED"

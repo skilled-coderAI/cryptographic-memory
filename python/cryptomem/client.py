@@ -82,6 +82,15 @@ class MemoryClient:
         gracefully to a local SQLite store so edge devices keep working.
         """
         mode = self.settings.mode.lower()
+        if mode == "neo4j":
+            from cryptomem.store.neo4j_store import Neo4jStore
+
+            return Neo4jStore(
+                uri=self.settings.neo4j_uri,
+                user=self.settings.neo4j_user,
+                password=self.settings.neo4j_password,
+                database=self.settings.neo4j_database,
+            )
         if mode == "remote" and self.settings.backend_url:
             from cryptomem.store.remote_store import RemoteStore
 

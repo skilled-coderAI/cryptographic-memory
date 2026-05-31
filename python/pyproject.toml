@@ -29,6 +29,7 @@ dependencies = [
 [project.optional-dependencies]
 local = ["sentence-transformers>=3.0", "onnxruntime>=1.17"]
 serve = ["fastapi>=0.110", "uvicorn>=0.29", "tiktoken>=0.7"]
+neo4j = ["neo4j>=5.14"]
 dev = ["pytest>=8", "respx>=0.21", "ruff>=0.6", "mypy>=1.10", "build>=1.2"]
 
 [project.scripts]
@@ -51,7 +52,7 @@ warn_redundant_casts = true
 no_implicit_optional = true
 
 [[tool.mypy.overrides]]
-module = ["nacl.*", "sentence_transformers.*", "tiktoken.*"]
+module = ["nacl.*", "sentence_transformers.*", "tiktoken.*", "neo4j", "neo4j.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
