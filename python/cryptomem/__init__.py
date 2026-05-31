@@ -12,6 +12,8 @@ from cryptomem.models import (
     ScoredNode,
 )
 from cryptomem.proactive import Planner, TriggerEngine, WriteBack
+from cryptomem.store.remote_store import RemoteStore
+from cryptomem.store.sqlite_store import SqliteStore
 from cryptomem.verification import (
     ChainOfVerification,
     Citer,
@@ -43,5 +45,7 @@ __all__ = [
     "Planner",
     "TriggerEngine",
     "WriteBack",
+    "SqliteStore",
+    "RemoteStore",
     "__version__",
 ]

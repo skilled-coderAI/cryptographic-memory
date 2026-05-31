@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     backend_url: str | None = None
     backend_api_key: str | None = None
     signing_key_path: str = "./cryptomem.key"
+    byok_provider: str | None = None
+    signing_seed_env: str = "CRYPTOMEM_SIGNING_SEED"
     max_context_tokens: int = 1500
     require_verification: bool = True
     contradiction_threshold: float = 0.6

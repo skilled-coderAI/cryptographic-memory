@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 from cryptomem.adapters.base import LLMAdapter
 from cryptomem.adapters.ollama_adapter import OllamaAdapter
 from cryptomem.client import MemoryClient
-from cryptomem.models import Relationship
+from cryptomem.models import MemoryNode, Relationship
 
 
 class MemoryIn(BaseModel):
@@ -119,6 +119,17 @@ def create_app(
             metadata=body.metadata,
         )
         return {**node.model_dump(), "verified": mem.verify(node)}
+
+    @app.post("/cmem/v1/memory/signed")
+    def add_signed(node: MemoryNode) -> dict:
+        if not mem.verify(node):
+            raise HTTPException(status_code=422, detail="node failed verification")
+        mem.store.write(node)
+        return {**node.model_dump(), "verified": True}
+
+    @app.get("/cmem/v1/memory")
+    def list_memory() -> dict:
+        return {"nodes": [n.model_dump() for n in mem.store.all()]}
 
     @app.get("/cmem/v1/memory/pending")
     def pending() -> dict:

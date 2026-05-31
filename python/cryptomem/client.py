@@ -7,7 +7,8 @@ from cryptomem.adapters.base import LLMAdapter
 from cryptomem.adapters.mock_adapter import MockAdapter
 from cryptomem.config import Settings
 from cryptomem.crypto.hashing import sha256
-from cryptomem.crypto.merkle import merkle_root
+from cryptomem.crypto.keys import build_signer
+from cryptomem.crypto.merkle import merkle_proof, merkle_root, verify_proof
 from cryptomem.crypto.signer import Signer
 from cryptomem.efficiency.budgeter import fit_to_budget
 from cryptomem.efficiency.cache import SemanticCache
@@ -54,8 +55,8 @@ class MemoryClient:
         embedder: Embedder | None = None,
     ):
         self.settings = settings or Settings()
-        self.store = store or SqliteStore(self.settings.sqlite_path)
-        self.signer = signer or Signer.from_key_file(self.settings.signing_key_path)
+        self.signer = signer or build_signer(self.settings)
+        self.store = store or self._build_store()
         self.embedder = embedder or StubEmbedder()
         self.retriever = Retriever(
             store=self.store,
@@ -72,6 +73,23 @@ class MemoryClient:
         self.entropy = SemanticEntropy(
             self.embedder, cluster_threshold=self.settings.entropy_cluster_threshold
         )
+
+    def _build_store(self) -> MemoryStore:
+        """Select the store from ``settings.mode``; fall back to SQLite offline.
+
+        ``mode="remote"`` (with a ``backend_url``) uses a :class:`RemoteStore`,
+        but if the backend fails its health check at init the client degrades
+        gracefully to a local SQLite store so edge devices keep working.
+        """
+        mode = self.settings.mode.lower()
+        if mode == "remote" and self.settings.backend_url:
+            from cryptomem.store.remote_store import RemoteStore
+
+            remote = RemoteStore(self.settings.backend_url, self.settings.backend_api_key)
+            if remote.healthz():
+                return remote
+            return SqliteStore(self.settings.sqlite_path)
+        return SqliteStore(self.settings.sqlite_path)
 
     def archive(
         self,
@@ -134,15 +152,38 @@ class MemoryClient:
         """Return verified neighbours reachable within ``depth`` hops."""
         return [n for n in self.store.neighbors(node_id, depth=depth) if self.verify(n)]
 
+    def _ledger_leaves(self) -> tuple[list[MemoryNode], list[str]]:
+        nodes = sorted(
+            (n for n in self.store.all() if n.crypto is not None), key=lambda n: n.node_id
+        )
+        return nodes, [n.crypto.hash for n in nodes if n.crypto is not None]
+
+    def ledger_root(self) -> str | None:
+        """Merkle root over every stored node's hash (current ledger anchor)."""
+        return merkle_root(self._ledger_leaves()[1])
+
     def proof(self, node_id: str) -> dict | None:
-        """Return the provenance anchor (leaf hash + Merkle root) for a node."""
+        """Return a verifiable Merkle inclusion proof for a node.
+
+        Includes the node's write-time anchor plus an audit path against the
+        current ledger root, so an auditor can confirm membership offline via
+        :func:`verify_proof` without trusting this process.
+        """
         node = self.store.get(node_id)
         if node is None or node.crypto is None:
             return None
+        nodes, leaves = self._ledger_leaves()
+        index = next((i for i, n in enumerate(nodes) if n.node_id == node_id), -1)
+        path = merkle_proof(leaves, index) if index >= 0 else []
+        root = merkle_root(leaves)
+        included = root is not None and verify_proof(node.crypto.hash, path, root)
         return {
             "node_id": node.node_id,
             "leaf_hash": node.crypto.hash,
             "merkle_root": node.crypto.merkle_root,
+            "ledger_root": root,
+            "proof": [{"sibling": sibling, "position": pos} for sibling, pos in path],
+            "included": included,
             "verified": self.verify(node),
         }
 

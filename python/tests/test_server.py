@@ -42,6 +42,11 @@ def test_memory_crud_and_proof(api: TestClient):
     assert proof["node_id"] == node_id
     assert proof["merkle_root"]
     assert proof["verified"] is True
+    assert proof["included"] is True
+    assert "ledger_root" in proof
+
+    listed = api.get("/cmem/v1/memory").json()
+    assert any(n["node_id"] == node_id for n in listed["nodes"])
 
     assert api.get("/cmem/v1/memory/missing").status_code == 404
 
