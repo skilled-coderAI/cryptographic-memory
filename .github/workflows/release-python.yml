@@ -3,7 +3,7 @@ name: release-python
 # Tag the Python package release as `py-vX.Y.Z` to trigger this workflow.
 on:
   push:
-    tags: ["py-v*"]
+    tags: ["main"]
 
 permissions:
   contents: read
