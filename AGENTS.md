@@ -1,6 +1,6 @@
 # Repository Guidelines
 
-This repository hosts `cryptomem`, a cryptographically verified, relational, persistent memory engine for AI agents. The Python engine (`python/`) is implemented through Phase P3: signed/hashed memory nodes with Merkle anchoring, vector + knowledge-graph retrieval, a strict grounding gate, token-budget/dedupe/compress efficiency, an Ollama-compatible FastAPI sidecar, and accuracy pillars (faithfulness, citations, semantic-entropy confidence, Chain-of-Verification). The `rust/` SDK is not yet implemented.
+This repository hosts `cryptomem`, a cryptographically verified, relational, persistent memory engine for AI agents. The Python engine (`python/`) is implemented through Phase P5: signed/hashed memory nodes with Merkle anchoring and verifiable inclusion proofs, vector + knowledge-graph retrieval, a strict grounding gate, token-budget/dedupe/compress efficiency, an Ollama-compatible FastAPI sidecar, accuracy pillars (faithfulness, citations, semantic-entropy confidence, Chain-of-Verification), proactive memory (planner / triggers / write-back), BYOK key providers, and pluggable stores (`SqliteStore`, `Neo4jStore`, `RemoteStore`) selected by `CRYPTOMEM_MODE`. The `rust/` SDK is not yet implemented.
 
 ## Project Structure & Module Organization
 
@@ -12,7 +12,7 @@ This is a monorepo partitioned by language:
 ## Build, Test, and Development Commands
 
 ### Python (`python/`)
-- **Install**: `pip install -e ".[local,serve,dev]"`
+- **Install**: `pip install -e ".[local,serve,dev]"` (add `neo4j` for the graph store).
 - **Run Sidecar**: `cryptomem serve --port 8088 --ollama-url http://localhost:11434`
 - **Unit Tests**: `pytest python/ -m "not integration"`
 - **Integration Tests**: `pytest -m integration`

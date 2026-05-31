@@ -9,7 +9,7 @@
 <p>
   <a href="https://github.com/skilled-coderAI/cryptographic-memory/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/skilled-coderAI/cryptographic-memory/actions/workflows/ci.yml/badge.svg" /></a>
   <a href="#license"><img alt="License: MIT OR Apache-2.0" src="https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg" /></a>
-  <a href="./docs/research_overview.md"><img alt="Status" src="https://img.shields.io/badge/status-pre--development%20research-orange.svg" /></a>
+  <a href="./ROADMAP.md"><img alt="Status" src="https://img.shields.io/badge/status-engine%20implemented%20(pre--release)-success.svg" /></a>
   <img alt="Python" src="https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white" />
   <img alt="Rust" src="https://img.shields.io/badge/rust-client%20SDK-000000?logo=rust&logoColor=white" />
   <img alt="Runs on Ollama" src="https://img.shields.io/badge/runs%20on-Ollama-black" />
@@ -27,10 +27,15 @@
 
 </div>
 
-> [!WARNING]
-> **Status: pre-development research phase.** This repository currently contains the
-> **design, grounding, and feasibility documentation** for `cryptomem`. No packages are
-> published yet. The first tagged release will be **`v0.1.0`** — see [`ROADMAP.md`](./ROADMAP.md).
+> [!NOTE]
+> **Status: the Python engine is implemented and tested (Phases P0–P5).** It provides
+> SHA-256/Ed25519 signed memory with **Merkle inclusion proofs**, vector + knowledge-graph
+> retrieval, a strict grounding gate, accuracy pillars (faithfulness, citations,
+> semantic-entropy confidence, Chain-of-Verification), proactive memory
+> (planner / triggers / write-back), BYOK key providers, and **SQLite / Neo4j / remote-backend**
+> stores behind an Ollama-compatible sidecar. Packages are **not yet published** to PyPI/crates.io —
+> install from source for now. The first tagged release will be **`v0.1.0`** — see
+> [`ROADMAP.md`](./ROADMAP.md). The Rust client SDK (`rust/`) is still planned.
 
 ---
 
@@ -48,7 +53,7 @@ verifiable memory. `cryptomem` gives any model — including tiny local Ollama S
 Every fact is hashed (SHA-256) and signed (Ed25519). Tampered or unverified facts are **never** injected — the agent **abstains** instead of guessing.
 
 ### 🕸️ Relational persistence
-GraphRAG-style nodes + edges. SQLite + `sqlite-vec` by default; Neo4j for the server profile.
+GraphRAG-style nodes + edges. **SQLite** by default; a graph-native **Neo4j** store and a zero-trust **remote ledger backend** are first-class and selectable by config.
 
 </td>
 <td width="50%" valign="top">
@@ -95,17 +100,22 @@ Full API in [`docs/api_documentation.md`](./docs/api_documentation.md).
 
 ---
 
-## Quickstart *(planned — targets v0.3.0)*
+## Quickstart
 
 ```bash
 # 1) a tiny local model
 ollama pull qwen2.5:0.5b
 ollama serve
 
-# 2) verified-memory sidecar in front of it
-pip install "cryptomem[serve,local]"
-cryptomem serve --port 8088 --ollama-url http://localhost:11434 --mode sqlite
+# 2) verified-memory sidecar in front of it (from source until v0.1.0 is published)
+pip install -e "./python[serve,local]"
+cryptomem serve --port 8088 --ollama-url http://localhost:11434
 ```
+
+The sidecar defaults to the local SQLite store. Select a different backend with
+`CRYPTOMEM_*` env vars — e.g. `CRYPTOMEM_MODE=neo4j` (with `pip install -e "./python[neo4j]"`
+and `CRYPTOMEM_NEO4J_URI=...`) or `CRYPTOMEM_MODE=remote` with `CRYPTOMEM_BACKEND_URL=...`
+(falls back to SQLite if the backend health check fails, so edge devices stay online).
 
 Point your existing client at the sidecar:
 
