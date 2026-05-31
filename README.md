@@ -35,7 +35,8 @@
 > (planner / triggers / write-back), BYOK key providers, and **SQLite / Neo4j / remote-backend**
 > stores behind an Ollama-compatible sidecar. Packages are **not yet published** to PyPI/crates.io —
 > install from source for now. The first tagged release will be **`v0.1.0`** — see
-> [`ROADMAP.md`](./ROADMAP.md). The Rust client SDK (`rust/`) is still planned.
+> [`ROADMAP.md`](./ROADMAP.md). A typed Rust client SDK (`rust/cryptomem-rs`) ships alongside,
+> with client-side Ed25519 signing the Python engine verifies.
 
 ---
 

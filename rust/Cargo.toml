@@ -1,0 +1,3 @@
+[workspace]
+members = ["cryptomem-rs"]
+resolver = "2"

@@ -1,0 +1,29 @@
+[package]
+name = "cryptomem-rs"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.70"
+description = "Typed Rust client for the cryptomem verified-memory sidecar, with client-side Ed25519 signing that the Python engine verifies."
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/skilled-coderAI/cryptographic-memory"
+readme = "README.md"
+keywords = ["ai", "memory", "cryptography", "ed25519", "rag"]
+categories = ["api-bindings", "cryptography"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+rand = "0.8"
+hex = "0.4"
+thiserror = "1"
+reqwest = { version = "0.12", default-features = false, features = [
+    "blocking",
+    "json",
+    "rustls-tls",
+], optional = true }
+
+[features]
+default = ["http"]
+http = ["dep:reqwest"]
