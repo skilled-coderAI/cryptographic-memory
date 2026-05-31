@@ -47,6 +47,10 @@ jobs:
       - name: Build Release
         run: cargo build --release --locked
 
+      - name: List release artifacts
+        run: |
+          ls -lah target/release
+
       - name: Package Binary
         run: |
           tar -czf cryptomem-rs-linux-x86_64.tar.gz \
