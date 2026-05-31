@@ -1,6 +1,6 @@
 # --------------------------------------------------------------
-# CI – runs Python tests if a Python project file exists,
-# and Rust tests if a Cargo.toml exists.
+# CI – runs Python tests when a Python project file exists,
+# and Rust tests when a Cargo.toml exists.
 # --------------------------------------------------------------
 name: CI
 
@@ -12,13 +12,12 @@ on:
 
 jobs:
   # ----------------------------------------------------------
-  # Python job – only runs when python/pyproject.toml is present
+  # Python job – only runs if python/pyproject.toml is present
   # ----------------------------------------------------------
   python:
-    name: Python CI
-    runs-on: ubuntu-latest
-    # <<< fixed – hashFiles now inside ${{ … }} >>>
+    # ← expression wrapped in ${{ … }}
     if: ${{ hashFiles('python/pyproject.toml') != '' }}
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -29,7 +28,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install deps
+      - name: Install Python deps
         run: |
           python -m pip install --upgrade pip
           pip install -r python/requirements.txt
@@ -39,13 +38,11 @@ jobs:
         run: pytest python/tests
 
   # ----------------------------------------------------------
-  # Rust job – only runs when rust/Cargo.toml is present
+  # Rust job – only runs if rust/Cargo.toml is present
   # ----------------------------------------------------------
   rust:
-    name: Rust CI
-    runs-on: ubuntu-latest
-    # <<< fixed – hashFiles now inside ${{ … }} >>>
     if: ${{ hashFiles('rust/Cargo.toml') != '' }}
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository

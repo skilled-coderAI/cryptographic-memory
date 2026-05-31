@@ -1,20 +1,19 @@
 # --------------------------------------------------------------
-# Release Rust – builds a binary on every version tag, but only
-# if the repository actually contains a Cargo.toml file.
+# Release Rust – builds a binary on every version tag,
+# but only if a Cargo.toml file exists in the repository.
 # --------------------------------------------------------------
 name: Release Rust
 
 on:
   push:
     tags:
-      - "v*"   # matches v1.2.3, v0.9.0‑rc, etc.
+      - "v*"   # matches tags like v1.2.3, v0.9.0‑rc, etc.
 
 jobs:
   build-and-release:
-    name: Build & Release
-    runs-on: ubuntu-latest
-    # <<< fixed – hashFiles now inside ${{ … }} >>>
+    # ← expression wrapped in ${{ … }}
     if: ${{ hashFiles('rust/Cargo.toml') != '' }}
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -46,4 +45,4 @@ jobs:
       - name: Upload binary to release
         uses: softprops/action-gh-release@v2
         with:
-          files: rust/target/release/cryptomem-rs   # <-- replace with the real binary name
+          files: rust/target/release/cryptomem-rs   # ← replace with the actual binary name
