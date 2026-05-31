@@ -1,20 +1,19 @@
 # --------------------------------------------------------------
-# Release workflow – builds and publishes a Rust binary when a
-# tag (v*) is pushed, *but only if the repository actually
-# contains a Rust Cargo.toml*.
+# Release Rust – builds a binary on every version tag, but only
+# if the repository actually contains a Cargo.toml file.
 # --------------------------------------------------------------
 name: Release Rust
 
 on:
   push:
     tags:
-      - "v*"   # e.g. v1.2.3
+      - "v*"   # matches v1.2.3, v0.9.0‑rc, etc.
 
 jobs:
   build-and-release:
     name: Build & Release
     runs-on: ubuntu-latest
-    # <-- Fixed: hashFiles is now inside ${{ … }}
+    # <<< fixed – hashFiles now inside ${{ … }} >>>
     if: ${{ hashFiles('rust/Cargo.toml') != '' }}
 
     steps:
@@ -33,9 +32,9 @@ jobs:
           cd rust
           cargo build --release
 
-      # ------------------------------------------------------
-      # OPTIONAL – create a GitHub release and upload the binary.
-      # ------------------------------------------------------
+      # --------------------------------------------------
+      # OPTIONAL – create a GitHub Release and upload the binary.
+      # --------------------------------------------------
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
@@ -47,4 +46,4 @@ jobs:
       - name: Upload binary to release
         uses: softprops/action-gh-release@v2
         with:
-          files: rust/target/release/cryptomem-rs
+          files: rust/target/release/cryptomem-rs   # <-- replace with the real binary name

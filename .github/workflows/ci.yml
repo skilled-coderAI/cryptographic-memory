@@ -1,5 +1,6 @@
 # --------------------------------------------------------------
-# CI workflow – builds the Python and Rust parts of the repo.
+# CI – runs Python tests if a Python project file exists,
+# and Rust tests if a Cargo.toml exists.
 # --------------------------------------------------------------
 name: CI
 
@@ -10,13 +11,13 @@ on:
     branches: [ main ]
 
 jobs:
-  # -----------------------------------------------------------------
-  # Python CI – runs only when a Python project file is present.
-  # -----------------------------------------------------------------
+  # ----------------------------------------------------------
+  # Python job – only runs when python/pyproject.toml is present
+  # ----------------------------------------------------------
   python:
     name: Python CI
     runs-on: ubuntu-latest
-    # <-- Fixed: hashFiles is now inside ${{ … }}
+    # <<< fixed – hashFiles now inside ${{ … }} >>>
     if: ${{ hashFiles('python/pyproject.toml') != '' }}
 
     steps:
@@ -28,23 +29,22 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
+      - name: Install deps
         run: |
           python -m pip install --upgrade pip
           pip install -r python/requirements.txt
           pip install -e python
 
       - name: Run Python tests
-        run: |
-          pytest python/tests
+        run: pytest python/tests
 
-  # -----------------------------------------------------------------
-  # Rust CI – runs only when a Cargo.toml is present.
-  # -----------------------------------------------------------------
+  # ----------------------------------------------------------
+  # Rust job – only runs when rust/Cargo.toml is present
+  # ----------------------------------------------------------
   rust:
     name: Rust CI
     runs-on: ubuntu-latest
-    # <-- Fixed: hashFiles is now inside ${{ … }}
+    # <<< fixed – hashFiles now inside ${{ … }} >>>
     if: ${{ hashFiles('rust/Cargo.toml') != '' }}
 
     steps:
