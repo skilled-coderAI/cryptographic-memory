@@ -236,9 +236,11 @@ Integration tests (real Ollama + `qwen2.5:0.5b`) run in a separate, optionally-n
 6. Announce per the community plan in [`../ROADMAP.md`](../ROADMAP.md). In the
    release notes (and any cross-posts), **tag the framework communities whose
    integrations shipped** — [agno](https://github.com/agno-agi/agno) for the Python
-   package and [swarms-rs](https://github.com/The-Swarm-Corporation/swarms-rs) for the
-   Rust crate — and link [`./framework_integrations.md`](./framework_integrations.md)
-   so their users discover verified memory.
+   package, [swarms-rs](https://github.com/The-Swarm-Corporation/swarms-rs) for the
+   Rust crate, and [hermes-agent](https://github.com/NousResearch/hermes-agent) (tag the
+   Nous Research team, post to their Discord / Skills Hub) — and link
+   [`./framework_integrations.md`](./framework_integrations.md) and
+   [`./hermes_integration.md`](./hermes_integration.md) so their users discover verified memory.
 
 ---
 

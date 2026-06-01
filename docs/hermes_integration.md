@@ -146,9 +146,92 @@ This integration is scheduled for **v0.7.0** in [`../ROADMAP.md`](../ROADMAP.md)
 
 ---
 
-## 6. Verified References
+## 6. `hermes-agent` (Nous Research) — verified memory for a self-improving agent
+
+[`hermes-agent`](https://github.com/NousResearch/hermes-agent) is Nous Research's
+self-improving agent: a full CLI + messaging gateway (Telegram/Discord/Slack/…) with
+a **closed learning loop** — agent-curated memory, autonomous skill creation, FTS5
+session search, and user modeling. It runs *any* model (switch with `hermes model`,
+including **your own endpoint**), connects **any MCP server**, and exposes a 40+ tool
+toolset and a Skills system (agentskills.io compatible).
+
+**Why cryptomem matters here.** `hermes-agent`'s learning loop is powerful but its
+persisted memory is *agent-curated and unverified*. `cryptomem` adds the one thing a
+self-improving loop needs to stay trustworthy over time: every fact the agent persists
+is **Ed25519-signed at write and re-verified at recall**, and the agent **abstains
+instead of hallucinating** when nothing verified matches. That turns Hermes' growing
+memory into an *auditable* memory — and hardens it against memory poisoning / drift as
+the agent rewrites its own knowledge across sessions and platforms.
+
+```mermaid
+flowchart TD
+    HA[hermes-agent CLI / gateway] -->|A: model provider base_url| SIDE[cryptomem Sidecar :8088]
+    HA -->|B: MCP / tool / skill| TOOLS[memory_search / add / verify / proof]
+    SIDE --> OLL[Ollama :11434]
+    TOOLS --> REST[cmem/v1/* REST]
+    SIDE --> ENG[cryptomem Engine]
+    REST --> ENG
+    ENG -->|sign · verify · ground · abstain| STORE[(Verified Memory Store)]
+```
+
+### A. Drop-in grounding — point Hermes' model endpoint at the sidecar
+Because `hermes-agent` supports a **custom / own endpoint** and the `cryptomem`
+sidecar speaks Ollama's wire protocol (`/api/chat`, `/api/generate`, `/api/tags`),
+you can ground every turn with **zero agent-code changes**:
+
+```bash
+# 1) local model + sidecar in front of it
+ollama pull hermes3 && ollama serve
+cryptomem serve --port 8088 --ollama-url http://localhost:11434 --mode sqlite
+
+# 2) tell hermes-agent to use the sidecar as its model backend
+hermes config set provider.base_url http://localhost:8088   # the cryptomem sidecar
+hermes config set provider.model hermes3
+hermes                                                       # every reply is grounded / abstains
+```
+
+Each reply also carries the `cryptomem` provenance block (`injected_nodes`,
+`verified`, `tokens_saved`). Exact config keys/env vars: see the hermes-agent
+**Configuration**, **Providers**, and **Environment Variables** docs.
+
+### B. Verified memory as a Hermes tool / skill / MCP server
+`hermes-agent` connects **any MCP server** and runs custom tools/skills, so the
+richer path exposes the `/cmem/v1/*` surface (§4) as `memory_search`, `memory_add`,
+`memory_verify`, and `memory_proof`. A thin MCP wrapper (or a Hermes **skill**) over
+the sidecar REST lets Hermes' own loop *write* signed facts and *read back* only
+verified ones — with provenance visible in the trajectory and a Merkle inclusion
+proof available via `memory_proof`. The typed clients ([`../python/cryptomem`](../python/cryptomem),
+[`../rust/cryptomem-rs`](../rust/cryptomem-rs)) make the wrapper a few lines.
+
+### Use cases (`hermes-agent`)
+- **Trustworthy self-improvement.** Route the learning loop's memory writes through
+  `memory_add`; on recall the agent only sees signature-verified facts, so a poisoned
+  or drifted note can't silently become "knowledge."
+- **Cross-platform, cross-session recall you can audit.** A fact learned on Telegram
+  and recalled on Discord days later carries a verifiable signature + Merkle proof.
+- **Skill / report grounding.** Cron-scheduled daily reports and generated skills
+  cite verified `node_id`s, or abstain — premium reliability on a $5 VPS.
+- **Backend-agnostic.** Swap `--mode sqlite` for a hardened remote ledger backend by
+  changing only `CRYPTOMEM_MODE` / `CRYPTOMEM_BACKEND_URL` — Hermes config unchanged.
+
+### Community & tagging
+We're offering this back to the Nous Research / `hermes-agent` community for
+visibility and feedback. On each `cryptomem` release we **tag the maintainers and
+team** and share the integration in:
+
+- **Repo / maintainers:** [`NousResearch/hermes-agent`](https://github.com/NousResearch/hermes-agent)
+  — tag the Nous Research team in release notes and open a discussion/issue linking this guide.
+- **Discord & Skills Hub:** post the verified-memory skill to the
+  [hermes-agent Discord](https://github.com/NousResearch/hermes-agent#community) and
+  the Skills Hub (agentskills.io standard) so users discover it.
+- **Issues:** [`hermes-agent/issues`](https://github.com/NousResearch/hermes-agent/issues)
+  for an MCP/skill integration request that points back here.
+
+---
+
+## 7. Verified References
 
 - **Hermes 3 (function calling, XML tool tags):** [Technical Report](https://nousresearch.com/wp-content/uploads/2024/08/Hermes-3-Technical-Report.pdf)
 - **Hermes-Function-Calling (Ollama examples):** [github.com/NousResearch/Hermes-Function-Calling](https://github.com/NousResearch/Hermes-Function-Calling)
-- **hermes-agent (run locally with Ollama):** [github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)
+- **hermes-agent (Nous Research self-improving agent):** [github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) · [docs](https://hermes-agent.nousresearch.com/docs) (Providers · Configuration · MCP Integration · Memory · Skills · Environment Variables)
 - **cryptomem API (sidecar + tools surface):** [`./api_documentation.md`](./api_documentation.md)

@@ -161,11 +161,42 @@ in signed facts, and the agent **abstains** rather than hallucinates.
 |-----------|----------|------------------|-----|
 | [**agno**](https://github.com/agno-agi/agno) | Python | [`python/examples/agno_verified_memory.py`](./python/examples/agno_verified_memory.py) | Verified-memory tools backed by an in-process engine. |
 | [**swarms-rs**](https://github.com/The-Swarm-Corporation/swarms-rs) | Rust | [`rust/examples/swarms-verified-memory`](./rust/examples/swarms-verified-memory) | A `Tool` that queries the sidecar via `cryptomem-rs`. |
+| [**hermes-agent**](https://github.com/NousResearch/hermes-agent) | Any model | [`docs/hermes_integration.md`](./docs/hermes_integration.md) | Sidecar as the model endpoint, or verified memory as an MCP/tool/skill. |
 
-Full guide: [`docs/framework_integrations.md`](./docs/framework_integrations.md). These
-integrations are offered back to the [agno](https://github.com/agno-agi/agno) and
-[swarms-rs](https://github.com/The-Swarm-Corporation/swarms-rs) communities — see the
+Full guides: [`docs/framework_integrations.md`](./docs/framework_integrations.md) and
+[`docs/hermes_integration.md`](./docs/hermes_integration.md). These integrations are
+offered back to the [agno](https://github.com/agno-agi/agno),
+[swarms-rs](https://github.com/The-Swarm-Corporation/swarms-rs), and
+[hermes-agent](https://github.com/NousResearch/hermes-agent) communities — see the
 release announce step in [`docs/packaging_and_release.md`](./docs/packaging_and_release.md).
+
+### `hermes-agent` verified-memory skill — up for review with Nous Research
+
+We're packaging the verified-memory integration as a **`hermes-agent` skill**
+(agentskills.io standard) — `memory_search` / `memory_add` / `memory_verify` /
+`memory_proof` backed by the `cryptomem` sidecar — so a self-improving Hermes agent
+only ever recalls **signature-verified** facts and **abstains instead of guessing**.
+The design is in [`docs/hermes_integration.md`](./docs/hermes_integration.md) §6 and is
+**submitted for review with the NousResearch team and `hermes-agent` maintainers**.
+
+Tagging the [`hermes-agent`](https://github.com/NousResearch/hermes-agent) maintainers /
+contributors for review and feedback — thank you for building Hermes:
+[@NousResearch](https://github.com/NousResearch) ·
+[@teknium1](https://github.com/teknium1) ·
+[@OutThisLife](https://github.com/OutThisLife) ·
+[@kshitijk4poor](https://github.com/kshitijk4poor) ·
+[@0xbyt4](https://github.com/0xbyt4) ·
+[@benbarclay](https://github.com/benbarclay) ·
+[@alt-glitch](https://github.com/alt-glitch) ·
+[@helix4u](https://github.com/helix4u) ·
+[@austinpickett](https://github.com/austinpickett) ·
+[@ethernet8023](https://github.com/ethernet8023) ·
+[@briandevans](https://github.com/briandevans).
+
+Reviewers: the skill spec, tool schemas, and grounding guarantee are in
+[`docs/hermes_integration.md`](./docs/hermes_integration.md) §4 + §6; feedback via
+[Issues](https://github.com/skilled-coderAI/cryptographic-memory/issues) or the
+[hermes-agent Discord](https://github.com/NousResearch/hermes-agent#community) is welcome.
 
 ## Project status & roadmap
 
