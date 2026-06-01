@@ -1,12 +1,17 @@
 # --------------------------------------------------------------
-# Release – auto-bumps the (semver) version, then builds the Rust
-# crate and the Python package IN PARALLEL and attaches both to a
-# single GitHub Release. The Python package is also pushed to PyPI.
+# Release – auto-derives the next semver version, then builds the
+# Rust crate and the Python package IN PARALLEL and attaches both
+# to a single GitHub Release. The Python package is also pushed to
+# PyPI.
+#
+# IMPORTANT: `main` is a protected branch (PR-only, signed commits,
+# merge queue), so this workflow NEVER pushes a commit to main.
+# The version is computed from the latest git TAG, injected into
+# the build at build-time (not committed), and the new tag + Release
+# are created via the GitHub API by softprops/action-gh-release.
 #
 # Trigger: every push to main (auto patch bump) or a manual run
-# from the Actions tab. The `version` job bumps + commits the new
-# version; the two `build-*` jobs then run at the same time against
-# that commit; `release` waits for both and publishes once.
+# from the Actions tab.
 # --------------------------------------------------------------
 name: Release
 
@@ -26,49 +31,47 @@ concurrency:
 
 jobs:
   # ----------------------------------------------------------
-  # Auto-bump the Python package patch version (semver) so PyPI
-  # never rejects a duplicate. The bump is committed back to main
-  # with [skip ci] (so it does not re-trigger this workflow), and
-  # the resulting commit SHA is what every other job builds from.
+  # Compute the next semver from the latest `vX.Y.Z` tag (patch+1).
+  # No commit, no branch push -> works with protected `main`.
+  # First ever run (no tags) falls back to pyproject.toml's version.
   # ----------------------------------------------------------
   version:
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.bump.outputs.version }}
-      tag: ${{ steps.bump.outputs.tag }}
-      sha: ${{ steps.bump.outputs.sha }}
+      version: ${{ steps.next.outputs.version }}
+      tag: ${{ steps.next.outputs.tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Bump patch version
-        id: bump
+      - name: Compute next version
+        id: next
         run: |
           set -euo pipefail
-          proj="python/pyproject.toml"
-          init="python/cryptomem/__init__.py"
+          latest=$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n1 || true)
 
-          current=$(grep -oP '^version = "\K[0-9]+\.[0-9]+\.[0-9]+' "$proj")
-          IFS='.' read -r major minor patch <<< "$current"
-          new="${major}.${minor}.$((patch + 1))"
-          echo "Bumping ${current} -> ${new}"
+          if [ -z "${latest}" ]; then
+            new=$(grep -oP '^version = "\K[0-9]+\.[0-9]+\.[0-9]+' python/pyproject.toml)
+            echo "No existing tags; starting from pyproject version ${new}"
+          else
+            cur=${latest#v}
+            IFS='.' read -r major minor patch <<< "${cur}"
+            new="${major}.${minor}.$((patch + 1))"
+            echo "Latest tag ${latest} -> next ${new}"
+          fi
 
-          sed -i -E "s/^version = \"[0-9]+\.[0-9]+\.[0-9]+\"/version = \"${new}\"/" "$proj"
-          sed -i -E "s/^__version__ = \"[0-9]+\.[0-9]+\.[0-9]+\"/__version__ = \"${new}\"/" "$init"
+          # Guard against a tag that somehow already exists.
+          while git rev-parse "v${new}" >/dev/null 2>&1; do
+            IFS='.' read -r major minor patch <<< "${new}"
+            new="${major}.${minor}.$((patch + 1))"
+          done
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "$proj" "$init"
-          git commit -m "chore(release): bump version to ${new} [skip ci]"
-          git push origin HEAD:main
-
+          echo "Releasing version ${new}"
           {
             echo "version=${new}"
             echo "tag=v${new}"
-            echo "sha=$(git rev-parse HEAD)"
           } >> "$GITHUB_OUTPUT"
 
   # ----------------------------------------------------------
@@ -81,8 +84,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.version.outputs.sha }}
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -106,7 +107,9 @@ jobs:
           if-no-files-found: error
 
   # ----------------------------------------------------------
-  # Python – pure-Python package: build sdist (.tar.gz) + wheel (.whl)
+  # Python – pure-Python package: build sdist (.tar.gz) + wheel (.whl).
+  # The computed version is injected into the sources at build-time
+  # only (it is never committed back to the repo).
   # ----------------------------------------------------------
   build-python:
     needs: version
@@ -114,13 +117,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.version.outputs.sha }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Inject release version
+        run: |
+          set -euo pipefail
+          v="${{ needs.version.outputs.version }}"
+          sed -i -E "s/^version = \"[0-9]+\.[0-9]+\.[0-9]+\"/version = \"${v}\"/" python/pyproject.toml
+          sed -i -E "s/^__version__ = \"[0-9]+\.[0-9]+\.[0-9]+\"/__version__ = \"${v}\"/" python/cryptomem/__init__.py
 
       - name: Build sdist and wheel
         run: |
@@ -135,26 +143,14 @@ jobs:
           if-no-files-found: error
 
   # ----------------------------------------------------------
-  # Publish – waits for BOTH builds, tags the commit, and
-  # attaches every artifact to one GitHub Release.
+  # Publish – waits for BOTH builds, then creates the tag + Release
+  # via the GitHub API (no git push to a protected branch) and
+  # attaches every artifact.
   # ----------------------------------------------------------
   release:
     needs: [version, build-rust, build-python]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.version.outputs.sha }}
-          fetch-depth: 0
-
-      - name: Create and push tag
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag "${{ needs.version.outputs.tag }}"
-          git push origin "${{ needs.version.outputs.tag }}"
-
       - name: Download all build artifacts
         uses: actions/download-artifact@v4
         with:
@@ -164,6 +160,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.version.outputs.tag }}
+          target_commitish: ${{ github.sha }}
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: |
@@ -172,9 +169,7 @@ jobs:
 
   # ----------------------------------------------------------
   # PyPI – upload the wheel + sdist with an API token.
-  # `--skip-existing` means re-running on a version that is
-  # already on PyPI is a no-op instead of a hard failure, so
-  # the workflow only actually publishes when the version bumps.
+  # `--skip-existing` is a safety net; versions are unique per run.
   #
   # Requires repo secret: PYPI_API_TOKEN (the full `pypi-...` token).
   # ----------------------------------------------------------
