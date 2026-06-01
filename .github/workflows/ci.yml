@@ -1,6 +1,11 @@
 # --------------------------------------------------------------
-# CI – runs Python tests when a Python project file exists,
-# and Rust tests when a Cargo.toml exists.
+# CI – fast quality gate that runs on every push / PR to main.
+# It only TESTS the code (no publishing). The Release workflow
+# never runs tests, so this is the gate that stops a broken
+# commit from ever being turned into a release.
+#
+#   * Python job – runs when python/pyproject.toml exists.
+#   * Rust   job – runs when rust/Cargo.toml      exists.
 # --------------------------------------------------------------
 name: CI
 
@@ -15,24 +20,22 @@ jobs:
   # Python job – only runs if python/pyproject.toml is present
   # ----------------------------------------------------------
   python:
-    # ← expression wrapped in ${{ … }}
     if: ${{ hashFiles('python/pyproject.toml') != '' }}
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install Python deps
+      - name: Install Python package (with test deps)
         run: |
           python -m pip install --upgrade pip
-          pip install -r python/requirements.txt
-          pip install -e python
+          pip install -e "python[dev,serve]"
 
       - name: Run Python tests
         run: pytest python/tests
@@ -46,21 +49,18 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
         with:
-          toolchain: stable
-          profile: minimal
-          override: true
+          workspaces: rust
 
       - name: Cargo build
-        run: |
-          cd rust
-          cargo build --verbose
+        run: cargo build --locked --verbose --manifest-path rust/Cargo.toml
 
       - name: Cargo test
-        run: |
-          cd rust
-          cargo test --verbose
+        run: cargo test --locked --verbose --manifest-path rust/Cargo.toml

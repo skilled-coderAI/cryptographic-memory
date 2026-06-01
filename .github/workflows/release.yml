@@ -1,0 +1,130 @@
+# --------------------------------------------------------------
+# Release – builds the Rust crate and the Python package IN
+# PARALLEL, then attaches both to a single GitHub Release.
+#
+# Trigger: every push to main (auto date-based tag) or a manual
+# run from the Actions tab. The two `build-*` jobs run at the
+# same time; the `release` job waits for both and publishes once.
+# --------------------------------------------------------------
+name: Release
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Never run two releases for the same ref at once (a half-published
+# release with only one artifact is worse than waiting).
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # ----------------------------------------------------------
+  # One shared version tag for both artifacts, e.g. v2026.06.02-42
+  # ----------------------------------------------------------
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - name: Generate version tag
+        id: version
+        run: echo "tag=v$(date +'%Y.%m.%d')-${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+
+  # ----------------------------------------------------------
+  # Rust – the crate is a LIBRARY (no executable), so the
+  # distributable is the packaged `.crate` file, not a binary.
+  # ----------------------------------------------------------
+  build-rust:
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+
+      - name: Build release library
+        run: cargo build --release --locked --manifest-path rust/Cargo.toml
+
+      - name: Package crate
+        run: cargo package --locked --manifest-path rust/Cargo.toml
+
+      - name: Upload Rust artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-crate
+          path: rust/target/package/*.crate
+          if-no-files-found: error
+
+  # ----------------------------------------------------------
+  # Python – pure-Python package: build sdist (.tar.gz) + wheel (.whl)
+  # ----------------------------------------------------------
+  build-python:
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build sdist and wheel
+        run: |
+          python -m pip install --upgrade build
+          python -m build python/
+
+      - name: Upload Python artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-dist
+          path: python/dist/*
+          if-no-files-found: error
+
+  # ----------------------------------------------------------
+  # Publish – waits for BOTH builds, tags the commit, and
+  # attaches every artifact to one GitHub Release.
+  # ----------------------------------------------------------
+  release:
+    needs: [version, build-rust, build-python]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create and push tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "${{ needs.version.outputs.tag }}"
+          git push origin "${{ needs.version.outputs.tag }}"
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.version.outputs.tag }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            artifacts/rust-crate/*
+            artifacts/python-dist/*
