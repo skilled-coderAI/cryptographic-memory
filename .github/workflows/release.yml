@@ -50,22 +50,26 @@ jobs:
         id: next
         run: |
           set -euo pipefail
-          latest=$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n1 || true)
+          # Only consider strict semver tags (vX.Y.Z, no leading zeros,
+          # no suffix). This deliberately ignores legacy date-based tags
+          # such as v2026.06.02-58 which are not valid semver.
+          semver='^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
+          latest=$(git tag -l | { grep -E "${semver}" || true; } | sort -V | tail -n1)
 
           if [ -z "${latest}" ]; then
             new=$(grep -oP '^version = "\K[0-9]+\.[0-9]+\.[0-9]+' python/pyproject.toml)
-            echo "No existing tags; starting from pyproject version ${new}"
+            echo "No semver tags; starting from pyproject version ${new}"
           else
             cur=${latest#v}
             IFS='.' read -r major minor patch <<< "${cur}"
-            new="${major}.${minor}.$((patch + 1))"
-            echo "Latest tag ${latest} -> next ${new}"
+            new="${major}.${minor}.$((10#${patch} + 1))"
+            echo "Latest semver tag ${latest} -> next ${new}"
           fi
 
           # Guard against a tag that somehow already exists.
           while git rev-parse "v${new}" >/dev/null 2>&1; do
             IFS='.' read -r major minor patch <<< "${new}"
-            new="${major}.${minor}.$((patch + 1))"
+            new="${major}.${minor}.$((10#${patch} + 1))"
           done
 
           echo "Releasing version ${new}"

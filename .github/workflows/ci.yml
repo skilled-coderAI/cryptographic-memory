@@ -4,8 +4,8 @@
 # never runs tests, so this is the gate that stops a broken
 # commit from ever being turned into a release.
 #
-#   * Python job – runs when python/pyproject.toml exists.
-#   * Rust   job – runs when rust/Cargo.toml      exists.
+#   * Python job – tests the Python package.
+#   * Rust   job – builds and tests the Rust crate.
 # --------------------------------------------------------------
 name: CI
 
@@ -17,10 +17,9 @@ on:
 
 jobs:
   # ----------------------------------------------------------
-  # Python job – only runs if python/pyproject.toml is present
+  # Python job
   # ----------------------------------------------------------
   python:
-    if: ${{ hashFiles('python/pyproject.toml') != '' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -41,10 +40,9 @@ jobs:
         run: pytest python/tests
 
   # ----------------------------------------------------------
-  # Rust job – only runs if rust/Cargo.toml is present
+  # Rust job
   # ----------------------------------------------------------
   rust:
-    if: ${{ hashFiles('rust/Cargo.toml') != '' }}
     runs-on: ubuntu-latest
 
     steps:
