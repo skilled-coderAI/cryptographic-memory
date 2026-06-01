@@ -63,7 +63,7 @@ The fastest signal of visibility comes from **runnable, grounded integrations** 
 2. **Flagship integration — Hermes**: ship `examples/hermes/` showing a NousResearch Hermes agent on Ollama gaining verified memory (both transparent-sidecar and tool-calling modes). See [`docs/hermes_integration.md`](./docs/hermes_integration.md). Offer it back to the Hermes ecosystem as an example/PR for cross-visibility.
 3. **Lower the barrier to contribute**: a backlog of well-scoped **`good first issue`** / **`help wanted`** items, issue/PR templates, and a clear `CONTRIBUTING.md`.
 4. **Show, don't tell**: publish an honest benchmark (hallucination-rate reduction with abstention on a small closed-domain QA set) using the eval harness from v0.5 — reproducible, with the dataset and script in-repo.
-5. **Distribution channels**: post to relevant communities (local-LLM, RAG, agent frameworks), submit talks/blog posts, and list the project where AI-agent tooling is discovered.
+5. **Distribution channels**: post to relevant communities (local-LLM, RAG, agent frameworks), submit talks/blog posts, and list the project where AI-agent tooling is discovered. Ship framework integrations ([`docs/framework_integrations.md`](./docs/framework_integrations.md)) for [agno](https://github.com/agno-agi/agno) (Python) and [swarms-rs](https://github.com/The-Swarm-Corporation/swarms-rs) (Rust), and tag both repositories/teams on each release for cross-community visibility.
 6. **Governance & responsiveness**: triage SLA in `CONTRIBUTING.md`, transparent roadmap (this file), and a public changelog so contributors see momentum.
 7. **Recognition**: credit contributors in release notes and an `AUTHORS`/all-contributors section.
 

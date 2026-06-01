@@ -1,3 +1,6 @@
 [workspace]
 members = ["cryptomem-rs"]
+# Framework integration examples carry heavy third-party deps and are run on
+# their own (`cd examples/<name> && cargo run`); keep them out of CI builds.
+exclude = ["examples"]
 resolver = "2"

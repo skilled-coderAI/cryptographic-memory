@@ -36,6 +36,37 @@ Ed25519 signature **byte-for-byte** (see `tests/crypto_vectors.rs`), so a
 Rust-signed `MemoryNode` passes the server's verification at
 `POST /cmem/v1/memory/signed`.
 
+## Use with [swarms-rs](https://github.com/The-Swarm-Corporation/swarms-rs)
+
+Wrap this client in a swarms-rs `Tool` so any agent in a swarm grounds its
+answers on signature-verified facts (and abstains otherwise). The agent's LLM
+keeps talking to its OpenAI-compatible transport; only memory routes through
+cryptomem:
+
+```rust
+use cryptomem_rs::CryptoMemClient;
+use swarms_rs::structs::tool::{Tool, ToolDyn, ToolError};
+
+struct VerifiedMemoryTool { sidecar_url: String }
+
+impl Tool for VerifiedMemoryTool {
+    fn name(&self) -> &str { "memory_search" }
+    fn definition(&self) -> swarms_rs::llm::request::ToolDefinition {
+        serde_json::json!({
+            "name": "memory_search",
+            "description": "Return only cryptographically verified facts; abstain if empty.",
+            "parameters": { "type": "object",
+                "properties": { "query": { "type": "string" } }, "required": ["query"] }
+        }).into()
+    }
+}
+// ToolDyn::call parses {"query": ...} and calls CryptoMemClient::query.
+```
+
+Full runnable example crate:
+[`../examples/swarms-verified-memory`](../examples/swarms-verified-memory).
+See also [`../../docs/framework_integrations.md`](../../docs/framework_integrations.md).
+
 ## Features
 
 - `http` *(default)* — the blocking `CryptoMemClient` (pulls in `reqwest`).

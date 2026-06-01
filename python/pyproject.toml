@@ -30,7 +30,13 @@ dependencies = [
 local = ["sentence-transformers>=3.0", "onnxruntime>=1.17"]
 serve = ["fastapi>=0.110", "uvicorn>=0.29", "tiktoken>=0.7"]
 neo4j = ["neo4j>=5.14"]
+agno = ["agno>=1.0"]
 dev = ["pytest>=8", "respx>=0.21", "ruff>=0.6", "mypy>=1.10", "build>=1.2"]
+
+[project.urls]
+Homepage = "https://github.com/skilled-coderAI/cryptographic-memory"
+Documentation = "https://github.com/skilled-coderAI/cryptographic-memory/tree/main/docs"
+Issues = "https://github.com/skilled-coderAI/cryptographic-memory/issues"
 
 [project.scripts]
 cryptomem = "cryptomem.cli:main"

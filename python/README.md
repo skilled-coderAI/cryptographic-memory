@@ -45,7 +45,34 @@ Selected via `CRYPTOMEM_MODE` (or `Settings(mode=...)`):
 - **`remote`** — signs locally and POSTs verbatim to a `/cmem/v1/*` backend
   (`CRYPTOMEM_BACKEND_URL=...`); falls back to SQLite if the backend is down.
 
+## Use with [agno](https://github.com/agno-agi/agno)
+
+Expose verified memory as agno tools so the agent answers only from signed
+facts (or abstains):
+
+```python
+from agno.agent import Agent
+from agno.models.ollama import Ollama
+from cryptomem import MemoryClient
+
+MEM = MemoryClient()
+
+def recall_verified_memory(query: str) -> str:
+    """Return only signature-verified facts; abstain if none match."""
+    hits = [h for h in MEM.query(query, top_k=5) if h.verified]
+    if not hits:
+        return "NO_VERIFIED_MEMORY: abstain; do not guess."
+    return "\n".join(f"- [{h.node.node_id}] {h.node.content}" for h in hits)
+
+agent = Agent(model=Ollama(id="qwen2.5:0.5b"), tools=[recall_verified_memory])
+agent.print_response("What budget did Project Phoenix get?")
+```
+
+Full runnable example: [`examples/agno_verified_memory.py`](./examples/agno_verified_memory.py).
+See also [`../docs/framework_integrations.md`](../docs/framework_integrations.md).
+
 ## Optional extras
 
 `pip install "cryptomem[local]"` (MiniLM embeddings), `[serve]` (FastAPI
-Ollama-compatible sidecar + CLI), `[neo4j]` (graph store), `[dev]` (tooling).
+Ollama-compatible sidecar + CLI), `[neo4j]` (graph store), `[agno]` (agno
+integration example), `[dev]` (tooling).

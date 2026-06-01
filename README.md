@@ -147,9 +147,25 @@ let ollama = Ollama::new("http://127.0.0.1".to_string(), 8088);
 | [`docs/accuracy_and_hallucination.md`](./docs/accuracy_and_hallucination.md) | Reaching the accuracy targets; eval harness. |
 | [`docs/low_spec_hardware.md`](./docs/low_spec_hardware.md) | Running/developing on a low-spec laptop. |
 | [`docs/hermes_integration.md`](./docs/hermes_integration.md) | Flagship NousResearch Hermes agent integration. |
+| [`docs/framework_integrations.md`](./docs/framework_integrations.md) | Verified memory in **agno** (Python) & **swarms-rs** (Rust). |
 | [`docs/packaging_and_release.md`](./docs/packaging_and_release.md) | PyPI / crates.io release strategy. |
 
 ---
+
+## Ecosystem & framework integrations
+
+`cryptomem` drops into the agent frameworks you already use — answers stay grounded
+in signed facts, and the agent **abstains** rather than hallucinates.
+
+| Framework | Language | Runnable example | How |
+|-----------|----------|------------------|-----|
+| [**agno**](https://github.com/agno-agi/agno) | Python | [`python/examples/agno_verified_memory.py`](./python/examples/agno_verified_memory.py) | Verified-memory tools backed by an in-process engine. |
+| [**swarms-rs**](https://github.com/The-Swarm-Corporation/swarms-rs) | Rust | [`rust/examples/swarms-verified-memory`](./rust/examples/swarms-verified-memory) | A `Tool` that queries the sidecar via `cryptomem-rs`. |
+
+Full guide: [`docs/framework_integrations.md`](./docs/framework_integrations.md). These
+integrations are offered back to the [agno](https://github.com/agno-agi/agno) and
+[swarms-rs](https://github.com/The-Swarm-Corporation/swarms-rs) communities — see the
+release announce step in [`docs/packaging_and_release.md`](./docs/packaging_and_release.md).
 
 ## Project status & roadmap
 
