@@ -107,7 +107,7 @@ cryptomem serve --port 8088 --ollama-url http://localhost:11434
 ## 6. Reporting Bugs & Security Issues
 
 - **Bugs**: open an issue using the bug template; include OS, Python/Rust version, Ollama version & model, and a minimal repro.
-- **Security vulnerabilities**: do **not** open a public issue. Email **jayakarthi.d@gmail.com** *(replace before release)* with details. We follow coordinated disclosure (see `SECURITY.md` once published).
+- **Security vulnerabilities**: do **not** open a public issue. Follow the coordinated-disclosure process in [`SECURITY.md`](./SECURITY.md) — open a private [GitHub Security Advisory](https://github.com/skilled-coderAI/cryptographic-memory/security/advisories/new) or email **jayakarthi.d@gmail.com**.
 
 ---
 
@@ -123,4 +123,4 @@ Maintainers aim to triage new issues within a few days. If something stalls, a p
 
 ## 8. License
 
-By contributing, you agree that your contributions will be licensed under the project's license (**dual `MIT OR Apache-2.0`**, pending finalization — see [`ROADMAP.md`](./ROADMAP.md) §"Pre-release checklist"). The Apache-2.0 option provides an explicit patent grant, which matters for cryptographic code.
+By contributing, you agree that your contributions will be licensed under the project's license — **dual `MIT OR Apache-2.0`**, as declared in the published [`cryptomem`](https://pypi.org/project/cryptomem/) (PyPI) and [`cryptomem-rs`](https://crates.io/crates/cryptomem-rs) (crates.io) package metadata. The Apache-2.0 option provides an explicit patent grant, which matters for cryptographic code.

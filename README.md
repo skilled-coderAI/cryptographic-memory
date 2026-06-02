@@ -8,8 +8,10 @@
 
 <p>
   <a href="https://github.com/skilled-coderAI/cryptographic-memory/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/skilled-coderAI/cryptographic-memory/actions/workflows/ci.yml/badge.svg" /></a>
+  <a href="https://pypi.org/project/cryptomem/"><img alt="PyPI" src="https://img.shields.io/pypi/v/cryptomem?logo=pypi&logoColor=white&label=PyPI" /></a>
+  <a href="https://crates.io/crates/cryptomem-rs"><img alt="crates.io" src="https://img.shields.io/crates/v/cryptomem-rs?logo=rust&logoColor=white&label=crates.io" /></a>
+  <a href="https://github.com/skilled-coderAI/cryptographic-memory/releases"><img alt="Release" src="https://img.shields.io/github/v/release/skilled-coderAI/cryptographic-memory?label=release" /></a>
   <a href="#license"><img alt="License: MIT OR Apache-2.0" src="https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg" /></a>
-  <a href="./ROADMAP.md"><img alt="Status" src="https://img.shields.io/badge/status-engine%20implemented%20(pre--release)-success.svg" /></a>
   <img alt="Python" src="https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white" />
   <img alt="Rust" src="https://img.shields.io/badge/rust-client%20SDK-000000?logo=rust&logoColor=white" />
   <img alt="Runs on Ollama" src="https://img.shields.io/badge/runs%20on-Ollama-black" />
@@ -19,7 +21,7 @@
 <p>
   <a href="#why">Why</a> ·
   <a href="#how-it-crosses-languages">Architecture</a> ·
-  <a href="#quickstart-planned--targets-v030">Quickstart</a> ·
+  <a href="#quickstart">Quickstart</a> ·
   <a href="#documentation">Docs</a> ·
   <a href="./ROADMAP.md">Roadmap</a> ·
   <a href="./CONTRIBUTING.md">Contribute</a>
@@ -28,15 +30,17 @@
 </div>
 
 > [!NOTE]
-> **Status: the Python engine is implemented and tested (Phases P0–P5).** It provides
-> SHA-256/Ed25519 signed memory with **Merkle inclusion proofs**, vector + knowledge-graph
-> retrieval, a strict grounding gate, accuracy pillars (faithfulness, citations,
-> semantic-entropy confidence, Chain-of-Verification), proactive memory
+> **Status: published and installable.** The Python engine is on **[PyPI](https://pypi.org/project/cryptomem/)**
+> (`pip install cryptomem`) and the typed Rust client SDK is on
+> **[crates.io](https://crates.io/crates/cryptomem-rs)** (`cargo add cryptomem-rs`), with
+> tagged **[GitHub Releases](https://github.com/skilled-coderAI/cryptographic-memory/releases)**
+> carrying both artifacts. It provides SHA-256/Ed25519 signed memory with **Merkle inclusion
+> proofs**, vector + knowledge-graph retrieval, a strict grounding gate, accuracy pillars
+> (faithfulness, citations, semantic-entropy confidence, Chain-of-Verification), proactive memory
 > (planner / triggers / write-back), BYOK key providers, and **SQLite / Neo4j / remote-backend**
-> stores behind an Ollama-compatible sidecar. Packages are **not yet published** to PyPI/crates.io —
-> install from source for now. The first tagged release will be **`v0.1.0`** — see
-> [`ROADMAP.md`](./ROADMAP.md). A typed Rust client SDK (`rust/cryptomem-rs`) ships alongside,
-> with client-side Ed25519 signing the Python engine verifies.
+> stores behind an Ollama-compatible sidecar. The Rust client signs nodes client-side that the
+> Python engine verifies byte-for-byte. Early `0.1.x` line — see [`ROADMAP.md`](./ROADMAP.md) for the
+> path to `1.0`.
 
 ---
 
@@ -108,13 +112,17 @@ Full API in [`docs/api_documentation.md`](./docs/api_documentation.md).
 ollama pull qwen2.5:0.5b
 ollama serve
 
-# 2) verified-memory sidecar in front of it (from source until v0.1.0 is published)
-pip install -e "./python[serve,local]"
+# 2) install the verified-memory engine from PyPI and run the sidecar in front of it
+pip install "cryptomem[serve,local]"
 cryptomem serve --port 8088 --ollama-url http://localhost:11434
 ```
 
+> Rust client: `cargo add cryptomem-rs`. Both packages are published —
+> [PyPI](https://pypi.org/project/cryptomem/) · [crates.io](https://crates.io/crates/cryptomem-rs).
+> (Developing on the repo? Install from source with `pip install -e "./python[serve,local]"`.)
+
 The sidecar defaults to the local SQLite store. Select a different backend with
-`CRYPTOMEM_*` env vars — e.g. `CRYPTOMEM_MODE=neo4j` (with `pip install -e "./python[neo4j]"`
+`CRYPTOMEM_*` env vars — e.g. `CRYPTOMEM_MODE=neo4j` (with `pip install "cryptomem[neo4j]"`
 and `CRYPTOMEM_NEO4J_URI=...`) or `CRYPTOMEM_MODE=remote` with `CRYPTOMEM_BACKEND_URL=...`
 (falls back to SQLite if the backend health check fails, so edge devices stay online).
 
@@ -200,6 +208,10 @@ Reviewers: the skill spec, tool schemas, and grounding guarantee are in
 
 ## Project status & roadmap
 
+**Published and installable today** — `pip install cryptomem`
+([PyPI](https://pypi.org/project/cryptomem/)) and `cargo add cryptomem-rs`
+([crates.io](https://crates.io/crates/cryptomem-rs)), with tagged
+[GitHub Releases](https://github.com/skilled-coderAI/cryptographic-memory/releases).
 See [`ROADMAP.md`](./ROADMAP.md) for the SemVer release train (v0.1 → v1.0).
 This is a **monorepo**: `python/` (`cryptomem` → PyPI) and `rust/` (`cryptomem-rs` → crates.io).
 

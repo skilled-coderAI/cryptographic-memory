@@ -6,6 +6,16 @@ This package is the Python engine. Every fact is SHA-256 hashed and Ed25519
 signed at write time; at read time each node is re-verified, and tampered or
 unsigned facts are dropped so the agent abstains rather than guessing.
 
+## Install
+
+```bash
+pip install cryptomem                  # core engine
+pip install "cryptomem[serve,local]"   # + Ollama-compatible sidecar & local embeddings
+```
+
+Published on [PyPI](https://pypi.org/project/cryptomem/); the typed Rust client is
+[`cryptomem-rs`](https://crates.io/crates/cryptomem-rs) on crates.io.
+
 ```python
 from cryptomem import MemoryClient
 

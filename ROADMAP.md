@@ -71,16 +71,24 @@ The fastest signal of visibility comes from **runnable, grounded integrations** 
 
 ---
 
-## Pre-release Checklist (before v0.1.0 tag)
+## Release Checklist
 
-- [ ] Choose & add license file (**recommended: dual `MIT OR Apache-2.0`** — Apache-2.0 gives a patent grant for the crypto code).
-- [ ] `SECURITY.md` with disclosure contact and supported versions.
-- [ ] Issue/PR templates + `good first issue` backlog.
-- [ ] CI: lint (ruff/clippy), type-check (mypy), tests, `cargo publish --dry-run`, `python -m build` smoke.
-- [ ] PyPI + crates.io project names reserved; Trusted Publishing configured.
-- [ ] `CHANGELOG.md` (Keep a Changelog format) seeded.
-- [ ] Real contact emails substituted in `CODE_OF_CONDUCT.md` / `CONTRIBUTING.md`.
-- [ ] README quickstart verified on a clean 8 GB machine.
+The `0.1.x` line is **published**: [`cryptomem` on PyPI](https://pypi.org/project/cryptomem/)
+(`pip install cryptomem`) and [`cryptomem-rs` on crates.io](https://crates.io/crates/cryptomem-rs)
+(`cargo add cryptomem-rs`), with tagged
+[GitHub Releases](https://github.com/skilled-coderAI/cryptographic-memory/releases) carrying both
+artifacts via `.github/workflows/release.yml`. Remaining items below harden the path to `1.0`.
+
+- [x] Dual license declared (**`MIT OR Apache-2.0`**) in package metadata on PyPI + crates.io.
+- [x] Issue/PR templates + `good first issue` backlog.
+- [x] CI: lint (ruff/clippy), type-check (mypy), tests, `cargo` + `python -m build` smoke.
+- [x] PyPI + crates.io project names reserved and publishing automated.
+- [x] README quickstart shows the published `pip install` / `cargo add` commands.
+- [x] Add top-level `LICENSE-MIT` + `LICENSE-APACHE` files matching the declared dual license.
+- [x] `SECURITY.md` with disclosure contact and supported versions.
+- [x] `CHANGELOG.md` (Keep a Changelog format) seeded with the published `0.1.x` line.
+- [x] Real contact emails substituted in `CODE_OF_CONDUCT.md` / `CONTRIBUTING.md`.
+- [ ] Normalize the version line to strict SemVer: yank/deprecate the date-based `2026.x` PyPI builds so `pip install cryptomem` resolves to the latest `0.1.x` (date-based versions sort *above* `0.1.x` under PEP 440). Requires registry credentials.
 
 ---
 

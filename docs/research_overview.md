@@ -1,6 +1,9 @@
 # Cryptographic Memory Plugin — Research Overview
 
-> **Status:** Pre-development research phase. These documents capture the design, grounding, and feasibility analysis for the `cryptomem` plugin *before* active coding begins.
+> **Status:** Design & reference docs for the **published** `cryptomem` plugin —
+> [`cryptomem` on PyPI](https://pypi.org/project/cryptomem/) (`pip install cryptomem`) and
+> [`cryptomem-rs` on crates.io](https://crates.io/crates/cryptomem-rs) (`cargo add cryptomem-rs`).
+> These documents capture the architecture, grounding, and feasibility analysis behind the implementation.
 
 ## Problem Statement
 AI agents depend on large models because small/local models hallucinate and lack persistent, verifiable memory. `cryptomem` is a model-agnostic plugin that gives any model (including local Ollama SLMs) a relational, persistent, **cryptographically verified** memory — improving accuracy, enabling proactiveness, and reducing token consumption.

@@ -1,6 +1,6 @@
 # Accuracy & Hallucination Reduction Strategy
 
-> Research document — part of the pre-development research phase for the `cryptomem` plugin.
+> Design & reference document for the **published** `cryptomem` plugin (`pip install cryptomem`).
 > Companions: [`./cryptographic_memory.md`](./cryptographic_memory.md) (architecture), [`./implementation_plan.md`](./implementation_plan.md) (engineering blueprint), [`./api_documentation.md`](./api_documentation.md) (API).
 >
 > **Goal under study:** reduce hallucinations by ~90% and push grounded accuracy above ~95% via the plugin, for any model size (including local Ollama SLMs).

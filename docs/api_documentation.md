@@ -6,9 +6,11 @@
 
 ---
 
-## 0. Document Verification Status (Pre-Development Review)
+## 0. Document Verification Status (API Design Review)
 
-This API was cross-checked against current Ollama / client-library behavior before development. Findings applied in this revision:
+This API was cross-checked against current Ollama / client-library behavior. The findings below
+are reflected in the **published** `cryptomem` ([PyPI](https://pypi.org/project/cryptomem/)) and
+`cryptomem-rs` ([crates.io](https://crates.io/crates/cryptomem-rs)) implementations:
 
 | # | Finding | Resolution |
 |---|---------|-----------|
@@ -17,7 +19,7 @@ This API was cross-checked against current Ollama / client-library behavior befo
 | V3 | Python `ollama` client accepts a custom host (`Client(host=...)`), so Python apps can also use **Mode B** (sidecar) with zero rewrite. | Noted in §5 (Mode A vs Mode B for Python). ([ollama-python](https://github.com/ollama/ollama-python)) |
 | V4 | `ollama-rs` (`Ollama::new(host, port)`) and `serde` ignore unknown JSON fields by default. | Confirmed: the extra `cryptomem` response block is safely ignored by typed Rust clients (§7.2). |
 
-**Conclusion:** with V1–V3 applied, the API suits the stated need (local Ollama, Python + Rust, drop-in base-URL swap). The design is considered **ready for development**.
+**Conclusion:** with V1–V3 applied, the API suits the stated need (local Ollama, Python + Rust, drop-in base-URL swap) and is **shipped in the published packages**.
 
 ---
 

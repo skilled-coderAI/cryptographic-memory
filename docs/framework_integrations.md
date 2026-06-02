@@ -52,7 +52,7 @@ Runnable example: [`../python/examples/agno_verified_memory.py`](../python/examp
 
 ```bash
 ollama pull qwen2.5:0.5b && ollama serve            # any small local model
-pip install -e "./python[local]" && pip install agno
+pip install "cryptomem[local,agno]"                # published on PyPI
 python python/examples/agno_verified_memory.py
 ```
 

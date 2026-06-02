@@ -8,7 +8,7 @@ facts, or abstains -- watch it ground one question and refuse another.
 Run it::
 
     ollama pull qwen2.5:0.5b && ollama serve
-    pip install -e "./python[local]" && pip install agno
+    pip install "cryptomem[local,agno]"   # published on PyPI
     python python/examples/agno_verified_memory.py
 
 The MemoryClient honours ``CRYPTOMEM_*`` env vars, so the same agent works

@@ -1,6 +1,8 @@
 # Packaging & Release Plan (Python + Rust)
 
-> Research document — part of the pre-development research phase.
+> Reference document describing the release process behind the **published** `cryptomem`
+> ([PyPI](https://pypi.org/project/cryptomem/)) and `cryptomem-rs`
+> ([crates.io](https://crates.io/crates/cryptomem-rs)) packages.
 > Companions: [`../ROADMAP.md`](../ROADMAP.md), [`../CONTRIBUTING.md`](../CONTRIBUTING.md), [`./implementation_plan.md`](./implementation_plan.md).
 >
 > Goal: a repeatable, secure, automated release of two artifacts — the Python engine/sidecar (`cryptomem` → PyPI) and the Rust client SDK (`cryptomem-rs` → crates.io).

@@ -1,6 +1,6 @@
 # Integrating `cryptomem` with the Hermes AI Agent
 
-> Research document — part of the pre-development research phase.
+> Integration guide for the **published** `cryptomem` plugin (`pip install cryptomem`).
 > Companions: [`./api_documentation.md`](./api_documentation.md), [`./accuracy_and_hallucination.md`](./accuracy_and_hallucination.md), [`../ROADMAP.md`](../ROADMAP.md).
 >
 > **Why this matters:** Hermes is a popular open-weights agent stack. A clean, grounded Hermes integration is our flagship demo for visibility and traction — it shows a small local model becoming *verifiably* accurate.

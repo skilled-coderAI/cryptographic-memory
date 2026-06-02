@@ -1,6 +1,6 @@
 # Running & Developing `cryptomem` on Low-Spec ("Potato") Hardware
 
-> Research document — part of the pre-development research phase.
+> Design & reference document for the **published** `cryptomem` plugin (`pip install cryptomem`).
 > Companions: [`./implementation_plan.md`](./implementation_plan.md), [`./api_documentation.md`](./api_documentation.md), [`./accuracy_and_hallucination.md`](./accuracy_and_hallucination.md).
 >
 > **Goal:** confirm the plugin can be *developed and run* on a constrained laptop, and specify the exact stack + config that fits, with grounded numbers.

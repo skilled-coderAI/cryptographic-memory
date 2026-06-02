@@ -7,6 +7,16 @@ memory transparently. Use this crate when you also want to **read provenance**
 or **manage memory** directly — including signing nodes locally so the Python
 engine verifies them (zero-trust ingest).
 
+## Install
+
+```bash
+cargo add cryptomem-rs
+```
+
+Published on [crates.io](https://crates.io/crates/cryptomem-rs); the Python engine that
+serves and verifies is [`cryptomem`](https://pypi.org/project/cryptomem/) on PyPI
+(`pip install "cryptomem[serve]"` to run the sidecar).
+
 ```rust
 use cryptomem_rs::{CryptoMemClient, crypto::Signer};
 use serde_json::json;
