@@ -12,12 +12,33 @@ marked under a **Protocol** heading and bump both packages together (see
 
 ## [Unreleased]
 
+## [0.1.5] - 2026-06-04
+
+### Added
+- Web example **`python/examples/database example/`**: a manus.im-style chat UI where
+  you ask a seeded SQLite sales/CRM database plain-English questions and a local Ollama
+  model answers strictly from cryptographically verified facts derived from that database
+  (no SQL is generated or executed). Includes a live reasoning pipeline panel
+  (understand → recall verified DB facts → verify → ground → synthesize), voice input
+  (speech-to-text) and spoken answers (text-to-speech), and a `README.md` with run and
+  embedder-tuning guidance.
+
+## [0.1.4] - 2026-06-03
+
+### Added
+- Runnable [agno](https://github.com/agno-agi/agno) examples grounded in verified memory:
+  a minimal quickstart (`python/examples/agno_quickstart.py`) and a polished, manus.im-style
+  web view (`python/examples/detailed example/`) that streams the live verified-memory
+  pipeline (embed → retrieve → verify → ground → synthesize) over a local Ollama model.
+
+## [0.1.3] - 2026-06-02
+
 ### Added
 - Top-level `LICENSE-MIT` + `LICENSE-APACHE` text files matching the declared
   `MIT OR Apache-2.0` package metadata.
 - `SECURITY.md` with coordinated-disclosure policy, supported versions, and crypto-specific scope.
-- Framework integration guides and runnable examples for [agno](https://github.com/agno-agi/agno)
-  (Python), [swarms-rs](https://github.com/The-Swarm-Corporation/swarms-rs) (Rust), and
+- Framework integration guides for [agno](https://github.com/agno-agi/agno) (Python),
+  [swarms-rs](https://github.com/The-Swarm-Corporation/swarms-rs) (Rust), and
   [`hermes-agent`](https://github.com/NousResearch/hermes-agent) (Nous Research) —
   see [`docs/framework_integrations.md`](./docs/framework_integrations.md) and
   [`docs/hermes_integration.md`](./docs/hermes_integration.md).
@@ -51,7 +72,10 @@ marked under a **Protocol** heading and bump both packages together (see
 - Open-source governance: `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `ROADMAP.md`,
   issue/PR templates, CI and release workflows.
 
-[Unreleased]: https://github.com/skilled-coderAI/cryptographic-memory/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/skilled-coderAI/cryptographic-memory/compare/v0.1.5...HEAD
+[0.1.5]: https://github.com/skilled-coderAI/cryptographic-memory/compare/v0.1.4...v0.1.5
+[0.1.4]: https://github.com/skilled-coderAI/cryptographic-memory/compare/v0.1.3...v0.1.4
+[0.1.3]: https://github.com/skilled-coderAI/cryptographic-memory/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/skilled-coderAI/cryptographic-memory/releases/tag/v0.1.2
 [0.1.1]: https://github.com/skilled-coderAI/cryptographic-memory/releases/tag/v0.1.1
 [0.1.0]: https://github.com/skilled-coderAI/cryptographic-memory/releases/tag/v0.1.0
