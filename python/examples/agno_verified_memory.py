@@ -26,6 +26,8 @@ from cryptomem import MemoryClient, Relationship
 
 MEM = MemoryClient()
 
+RECALL_MIN_CONFIDENCE = float(os.environ.get("CRYPTOMEM_RECALL_MIN_CONFIDENCE", "0.35"))
+
 
 def _seed() -> None:
     """Seed a couple of signed, related facts (idempotent)."""
@@ -43,12 +45,17 @@ def _seed() -> None:
 def recall_verified_memory(query: str) -> str:
     """Retrieve cryptographically verified facts relevant to `query`.
 
-    Only signature-verified memory nodes are returned. If nothing verified
-    matches, an explicit NO_VERIFIED_MEMORY notice is returned and you MUST
-    abstain instead of guessing. Ground every answer in these facts and cite
-    the node ids in square brackets.
+    Only signature-verified memory nodes that are also relevant enough to the
+    query (confidence >= RECALL_MIN_CONFIDENCE) are returned. If nothing
+    verified and relevant matches, an explicit NO_VERIFIED_MEMORY notice is
+    returned and you MUST abstain instead of guessing. Ground every answer in
+    these facts and cite the node ids in square brackets.
     """
-    verified = [h for h in MEM.query(query, top_k=5) if h.verified]
+    verified = [
+        h
+        for h in MEM.query(query, top_k=5)
+        if h.verified and h.confidence >= RECALL_MIN_CONFIDENCE
+    ]
     if not verified:
         return "NO_VERIFIED_MEMORY: abstain; do not guess."
     return "VERIFIED_FACTS:\n" + "\n".join(

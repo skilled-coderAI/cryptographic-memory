@@ -5,12 +5,16 @@ import re
 from cryptomem.embeddings.base import Embedder, cosine_similarity
 from cryptomem.models import ScoredNode
 
-_SENT = re.compile(r"[^.!?]+[.!?]?")
+_BOUNDARY = re.compile(r"(?:(?<!\d)[.!?]|[.!?](?!\d))+")
 
 
 def split_sentences(text: str) -> list[str]:
-    """Split text into trimmed, non-empty sentences (model-free)."""
-    return [s.strip() for s in _SENT.findall(text) if s.strip()]
+    """Split text into trimmed, non-empty sentences (model-free).
+
+    A ``.`` flanked by digits (e.g. ``$4.2M``) is treated as a decimal point,
+    not a sentence boundary, so numeric claims stay intact.
+    """
+    return [s.strip() for s in _BOUNDARY.split(text) if s.strip()]
 
 
 class FaithfulnessChecker:

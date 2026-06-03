@@ -64,7 +64,7 @@ class MemoryClient:
             verify=self.verify,
             require_verification=self.settings.require_verification,
         )
-        self.gate = GroundingGate()
+        self.gate = GroundingGate(min_confidence=self.settings.grounding_min_confidence)
         self.cache = SemanticCache()
         self.citer = Citer(self.embedder, min_support=self.settings.citation_min_support)
         self.faithfulness = FaithfulnessChecker(

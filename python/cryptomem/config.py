@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     signing_seed_env: str = "CRYPTOMEM_SIGNING_SEED"
     max_context_tokens: int = 1500
     require_verification: bool = True
+    grounding_min_confidence: float = 0.0
     contradiction_threshold: float = 0.6
     enable_citations: bool = False
     citation_min_support: float = 0.2
