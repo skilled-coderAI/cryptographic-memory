@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>cryptomem &mdash; verified memory agent</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="app" id="app">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-4z" />
+              <path d="M9 12l2 2 4-4" />
+            </svg>
+          </span>
+          <span class="brand-name">cryptomem</span>
+          <span class="brand-tag">verified</span>
+        </div>
+
+        <button class="new-btn" id="new-chat">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          New chat
+        </button>
+
+        <nav class="nav">
+          <a class="nav-item active"><span class="ni-ic">&#9673;</span> Agent</a>
+          <a class="nav-item"><span class="ni-ic">&#9783;</span> Memory</a>
+          <a class="nav-item"><span class="ni-ic">&#10003;</span> Verification</a>
+          <a class="nav-item"><span class="ni-ic">&#9776;</span> Library</a>
+        </nav>
+
+        <div class="side-section">
+          <div class="side-head">Verified memory</div>
+          <div class="fact-list" id="fact-list"></div>
+        </div>
+
+        <div class="sidebar-foot">
+          <span class="dot ok"></span> local-first &middot; Ollama
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <main class="main">
+        <header class="topbar">
+          <div class="model-pill" id="model-pill">
+            <span class="dot" id="ollama-dot"></span>
+            <span id="model-name">connecting&hellip;</span>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+
+          <div class="top-right">
+            <label class="switch" title="Show how the agent processes information">
+              <input type="checkbox" id="reasoning-toggle" />
+              <span class="slider"></span>
+              <span class="switch-label">Reasoning</span>
+            </label>
+          </div>
+        </header>
+
+        <section class="stage" id="stage">
+          <!-- Empty hero state -->
+          <div class="hero" id="hero">
+            <div class="plan-pill"><span>Verified memory</span><span class="sep">|</span><span class="muted">local model</span></div>
+            <h1 class="hero-title">What can I do for you?</h1>
+            <p class="hero-sub">Ask anything &mdash; answers are grounded in cryptographically verified facts, or the agent abstains.</p>
+
+            <div class="composer hero-composer" id="composer-hero">
+              <textarea id="input-hero" rows="1" placeholder="Ask anything &mdash; grounded in verified memory&hellip;"></textarea>
+              <div class="composer-bar">
+                <div class="composer-hint">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-4z"/></svg>
+                  signature-verified &middot; abstains instead of guessing
+                </div>
+                <button class="send" id="send-hero" aria-label="Send">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="chips" id="chips">
+              <button class="chip" data-q="What budget did Project Phoenix get, and who approved it?">Project Phoenix budget</button>
+              <button class="chip" data-q="When did Project Atlas ship to production?">Project Atlas ship date</button>
+              <button class="chip" data-q="What is the launch date of Project Hydra?">Project Hydra (should abstain)</button>
+            </div>
+          </div>
+
+          <!-- Conversation state -->
+          <div class="conversation" id="conversation" hidden></div>
+        </section>
+
+        <!-- Docked composer (conversation mode) -->
+        <div class="composer docked" id="composer-dock" hidden>
+          <textarea id="input-dock" rows="1" placeholder="Reply&hellip;"></textarea>
+          <button class="send" id="send-dock" aria-label="Send">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+      </main>
+
+      <!-- Reasoning panel -->
+      <aside class="reasoning" id="reasoning" hidden>
+        <div class="reasoning-head">
+          <div>
+            <div class="r-title">How it's processed</div>
+            <div class="r-sub">Live verified-memory pipeline</div>
+          </div>
+          <button class="r-close" id="reasoning-close" aria-label="Hide">&times;</button>
+        </div>
+        <div class="timeline" id="timeline">
+          <div class="r-empty">Send a message to watch the pipeline: <br />embed &rarr; retrieve &rarr; verify &rarr; ground &rarr; answer.</div>
+        </div>
+      </aside>
+    </div>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
