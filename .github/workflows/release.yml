@@ -110,7 +110,7 @@ jobs:
         run: cargo package -p cryptomem-rs --manifest-path rust/Cargo.toml --allow-dirty
 
       - name: Upload Rust artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: rust-crate
           path: rust/target/package/*.crate
@@ -146,7 +146,7 @@ jobs:
           python -m build python/
 
       - name: Upload Python artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: python-dist
           path: python/dist/*
